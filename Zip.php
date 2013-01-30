@@ -293,7 +293,7 @@ class Zip
         $path = realpath($path);
 
         if (empty($path) === true) {
-            throw new InvalidArgumentException('Undifined value in $path');
+            throw new RuntimeException('Undifined value in $path');
         }
 
         $this->magicMime = $path;

@@ -7,7 +7,7 @@ class Zip
 	private $_zipFileName;
 
 	/**
-	 * Base path of entire all
+	 * Base path for all
 	 */
 	private $_basePath;
 
@@ -32,6 +32,18 @@ class Zip
 	private $_tmpDestinationDir;
 
 	/**
+	 * Set up if search must check everything or be specific
+	 *    true : everything
+	 *    false: specific
+	 */
+	private $_greedy         = true;
+
+	/**
+	 * Stay with same structure
+	 */
+	private $_sameStructure  = true;
+
+	/**
 	 * Error in ZIP
 	 */
 	private $_zipError       = array( ZIPARCHIVE::ER_EXISTS => 'File already exists',
@@ -45,7 +57,7 @@ class Zip
 	                                  ZIPARCHIVE::ER_SEEK => 'Seek error', );
 
 	/**
-	 * array with accepted mime files
+	 * array with default accepted mime files
 	 */
 	private $_mimeFiles      = array( 'jpg' => 'image/jpeg',
 	                                  'jpeg' => 'image/jpeg',
@@ -54,7 +66,8 @@ class Zip
 	                                  'bmp' => 'image/bmp',
 	                                  'tiff' => 'image/tiff',
 	                                  'tif' => 'image/tiff',
-	                                  'txt' => 'text/plain', );
+	                                  'txt' => 'text/plain',
+	                                  'txt' => 'application/x-empty', );
 
 	/**
 	 * Path to magic.mime file
@@ -64,12 +77,12 @@ class Zip
 	/**
 	 * Boolean to remove zip file
 	 */
-	private $_removeZipFile  = true;
+	private $_removeZipFile  = false;
 
 	/**
 	 * Boolean to remove temporary directory
 	 */
-	private $_removeTmpDir   = true;
+	private $_removeTmpDir   = false;
 
 
 
@@ -167,7 +180,6 @@ class Zip
 	 */
 	public function setFilesToExtract($file)
 	{
-		$file = (string)$file;
 		$this->_filesToExtract[] = $file;
 	}
 
@@ -182,36 +194,6 @@ class Zip
 	public function getFilesToExtract()
 	{
 		return $this->_filesToExtract;
-	}
-
-
-
-
-	/**
-	 * Set temporary destination directory
-	 *
-	 * @param $tmpDestinationDir string
-	 */
-	public function setTmpDestinationDir($tmpDestinationDir)
-	{
-		if( file_exists($tmpDestinationDir) === false ){
-			mkdir($tmpDestinationDir);
-		}
-
-		$this->_tmpDestinationDir = realpath($tmpDestinationDir);
-	}
-
-
-
-
-	/**
-	 * Get temporary destination directory
-	 *
-	 * @return string
-	 */
-	public function getTmpDestinationDir()
-	{
-		return $this->_tmpDestinationDir;
 	}
 
 
@@ -248,9 +230,84 @@ class Zip
 
 
 	/**
+	 * Set temporary destination directory
+	 *
+	 * @param $tmpDestinationDir string
+	 */
+	public function setTmpDestinationDir($tmpDestinationDir)
+	{
+		if( file_exists($tmpDestinationDir) === false ){
+			mkdir($tmpDestinationDir);
+		}
+
+		$this->_tmpDestinationDir = realpath($tmpDestinationDir);
+	}
+
+
+
+
+	/**
+	 * Get temporary destination directory
+	 *
+	 * @return string
+	 */
+	public function getTmpDestinationDir()
+	{
+		return $this->_tmpDestinationDir;
+	}
+
+
+
+
+	/**
+	 * @param $bool boolean
+	 */
+	public function setGreedy($bool)
+	{
+		$this->_greedy = $bool;
+	}
+
+
+
+
+	/**
+	 * Get if search must check everything of specific
+	 */
+	public function getGreedy()
+	{
+		return $this->_greedy;
+	}
+
+
+
+
+	/**
+	 * @param $bool boolean
+	 */
+	public function setSameStructure($bool)
+	{
+		$this->_sameStructure = $bool;
+	}
+
+
+
+
+	/**
+	 * Get same structure or file only
+	 */
+	public function getSameStructure()
+	{
+		return $this->_sameStructure;
+	}
+
+
+
+
+	/**
 	 * Set allowed mime
 	 *
 	 * @param $key string Extension value
+	 *               Example: jpg
 	 * @param $value string Mime value
 	 *               Example: image/jpeg
 	 */
@@ -308,7 +365,7 @@ class Zip
 
 
 	/**
-	 * Unset specific mime
+	 * Unset specific value in $this->_mimeFiles
 	 */
 	public function unsetMime($key)
 	{
@@ -321,9 +378,9 @@ class Zip
 
 
 	/**
-	 * Clear $this->_mimeFiles
+	 * Unset all values in $this->_mimeFiles
 	 */
-	public function clearMime()
+	public function unsetAllMime()
 	{
 		$this->_mimeFiles = array();
 	}
@@ -332,7 +389,7 @@ class Zip
 
 
 	/**
-	 * Shortest way to remove all directories structures
+	 * Shortest way to remove all directories structure
 	 */
 	public function rrmdir($path)
 	{
@@ -364,8 +421,10 @@ class Zip
 
 	/**
 	 * Remove zip file
+	 *
+	 * @param $bool boolean
 	 */
-	public function removeZipFile($bool = true)
+	public function removeZipFile($bool)
 	{
 		$this->_removeZipFile = $bool;
 	}
@@ -375,8 +434,10 @@ class Zip
 
 	/**
 	 * Remove temporary directory
+	 *
+	 * @param $bool boolean
 	 */
-	public function removeTmpDir($bool = true)
+	public function removeTmpDir($bool)
 	{
 		$this->_removeTmpDir = $bool;
 	}
@@ -385,7 +446,6 @@ class Zip
 
 
 	/**
-	 * @param $fileName string
 	 * @param $flags integer
 	 */
 	public function open($flags = 0)
@@ -466,7 +526,7 @@ class Zip
 	 *
 	 * @return array
 	 */
-	public function moveValidMime()
+	public function moveValidMime(array $moveFiles = array())
 	{
 		$filesMoved        = array();
 		$destinationDir    = $this->getDestinationDir();
@@ -480,24 +540,53 @@ class Zip
 			throw new InvalidArgumentException('Undefined variable $_tmpDestinationDir');
 		}
 
-		$it = $this->iterateDir($tmpDestinationDir);
+		if( empty($moveFiles) === false ){
+			foreach($moveFiles as $file){
+				$tmpFile = realpath($tmpDestinationDir . DIRECTORY_SEPARATOR . $file);
 
-		if( $it !== false ){
-			while( $it->valid() === true ){
-				$mime = $this->isValidMime($it->key());
+				if( empty($tmpFile) === false ){
+					$mime = $this->isValidMime($tmpFile);
 
-				if( $mime['isValid'] === true ){
-					$pathInfo    = pathinfo($it->key());
-					$destination = $destinationDir . DIRECTORY_SEPARATOR
-								 . $pathInfo['filename'] . '_' . microtime(true)
-								 . '.' . $pathInfo['extension'];
-					if( empty($destination) === false && copy($it->key(), $destination) === true ){
-						$filesMoved[] = array( 'original' => $it->key(), 
-						                       'destination' => $destination, );
+					if( $mime['isValid'] === true ){
+						$pathInfo = pathinfo($file);
+						$destination = $destinationDir . DIRECTORY_SEPARATOR
+									 . $pathInfo['dirname'] . DIRECTORY_SEPARATOR;
+
+						/**
+						 * mkdir send an error if one of the directories exists
+						 */
+						@mkdir($destination, '0666', true);
+
+						$destination .= $pathInfo['filename'] . '.' . $pathInfo['extension'];
+
+						if( copy($tmpFile, $destination) === true ){
+							$filesMoved[] = array( 'original' => $tmpFile, 
+												   'destination' => $destination, );
+						}
 					}
 				}
+			}
+		}
+		else{
+			$it = $this->iterateDir($tmpDestinationDir);
 
-				$it->next();
+			if( $it !== false ){
+				while( $it->valid() === true ){
+					$mime = $this->isValidMime($it->key());
+
+					if( $mime['isValid'] === true ){
+						$pathInfo    = pathinfo($it->key());
+						$destination = $destinationDir . DIRECTORY_SEPARATOR
+									 . $pathInfo['filename'] . '_' . microtime(true)
+									 . '.' . $pathInfo['extension'];
+						if( copy($it->key(), $destination) === true ){
+							$filesMoved[] = array( 'original' => $it->key(), 
+												   'destination' => $destination, );
+						}
+					}
+
+					$it->next();
+				}
 			}
 		}
 
@@ -512,7 +601,7 @@ class Zip
 	 *
 	 * @return array
 	 */
-	public function extractSpecificsFiles()
+	public function extractByExtension()
 	{
 		$tmpDestinationDir = $this->getTmpDestinationDir();
 
@@ -521,7 +610,7 @@ class Zip
 		}
 
 		for($i = 0; $i < $this->_zip->numFiles; $i++){
-			$file = $this->_zip->statIndex($i);
+			$file     = $this->_zip->statIndex($i);
 			$pathInfo = pathinfo($file['name']);
 
 			if( array_key_exists('extension', $pathInfo) === true ){
@@ -539,6 +628,64 @@ class Zip
 		$this->_zip->extractTo($tmpDestinationDir, $this->getFilesToExtract());
 
 		return $this->moveValidMime();
+	}
+
+
+
+
+	public function extractSpecificsFiles()
+	{
+		$files             = array();
+		$destinationDir = $this->getDestinationDir();
+
+		if( empty($destinationDir) === true ){
+			throw new InvalidArgumentException('Undefined variable $_destinationDir');
+		}
+
+		for($i = 0; $i < $this->_zip->numFiles; $i++){
+			$file     = $this->_zip->statIndex($i);
+			$pathInfo = pathinfo($file['name']);
+
+			if( empty($pathInfo['extension']) === false ){
+				$fileName = $pathInfo['filename'] . '.' . $pathInfo['extension'];
+
+				/**
+				 * Check first if user write full path or check if user only write the name of the file and want to check everything
+				 */
+				if( in_array($file, $this->getFilesToExtract()) === true
+					|| ( in_array($fileName, $this->getFilesToExtract()) === true && $this->getGreedy() === true ) ){
+					$files[] = $file['name'];
+				}
+			}
+		}
+
+		if( $this->getSameStructure() === true ){
+			$tmpDestinationDir = $this->getTmpDestinationDir();
+
+			if( empty($tmpDestinationDir) === true ){
+				throw new InvalidArgumentException('Undefined variable $_tmpDestinationDir');
+			}
+
+			$this->_zip->extractTo($tmpDestinationDir, $files);
+
+			return $this->moveValidMime($files);
+		}
+		else{
+			$this->_zip->extractTo($destinationDir, $files);
+
+			/**
+			 * Verify if is a valid mime
+			 */
+			foreach($files as $file){
+				$file = realpath( $destinationDir . DIRECTORY_SEPARATOR . $file );
+
+				if( empty($file) === false && $this->isValidMime($file) === false ){
+					unlink($file);
+				}
+			}
+
+			return $files;
+		}
 	}
 
 

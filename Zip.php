@@ -636,6 +636,3 @@ class Zip
         }
     }
 }
-
-
-$zip = new Zip();

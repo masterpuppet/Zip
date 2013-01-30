@@ -541,6 +541,11 @@ class Zip
         return $this->moveValidMime();
     }
 
+    /**
+     * Extract specifics files
+     *
+     * @return array
+     */
     public function extractSpecificsFiles()
     {
         $files             = array();

@@ -282,6 +282,12 @@ class Zip
 	 */
 	public function setMagicMime($path = null)
 	{
+		$path = realpath($path);
+
+		if( empty($path) === true ){
+			throw new InvalidArgumentException('Undifined value in $path');
+		}
+
 		$this->_magicMime = $path;
 	}
 
@@ -357,22 +363,22 @@ class Zip
 
 
 	/**
-	 * Remove temporary directory
+	 * Remove zip file
 	 */
-	public function removeTmpDir($bool = true)
+	public function removeZipFile($bool = true)
 	{
-		$this->_removeTmpDir = $bool;
+		$this->_removeZipFile = $bool;
 	}
 
 
 
 
 	/**
-	 * Remove zip file
+	 * Remove temporary directory
 	 */
-	public function removeZipFile($bool = true)
+	public function removeTmpDir($bool = true)
 	{
-		$this->_removeZipFile = $bool;
+		$this->_removeTmpDir = $bool;
 	}
 
 
@@ -411,7 +417,29 @@ class Zip
 		}
 
 		$dir = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
-		return new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::CHILD_FIRST);
+		return new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::SELF_FIRST);
+	}
+
+
+
+
+	/**
+	 * Get list from a specific directory
+	 *
+	 * @return array
+	 */
+	public function listFiles($path)
+	{
+		$files = array();
+		$it    = $this->iterateDir($path);
+
+		while( $it->valid() === true ){
+			$files[] = $it->key();
+
+			$it->next();
+		}
+
+		return $files;
 	}
 
 
@@ -518,6 +546,8 @@ class Zip
 
 	/**
 	 * Extract all files
+	 *
+	 * @return array
 	 */
 	public function extractAllFiles()
 	{
@@ -528,6 +558,8 @@ class Zip
 		}
 
 		$this->_zip->extractTo($destinationDir);
+
+		return $this->listFiles($destinationDir);
 	}
 
 
@@ -550,11 +582,45 @@ class Zip
 		}
 	}
 }
-
-$zip = new Zip('./', 'Zip.zip', 'allowed', 'zip');
+/**
+ * Example 1
+ *     Extract specifics files
+ *     Do not remove zip file
+ */
+$zip = new Zip('./', 'a.zip', 'allowed', 'zip');
 $zip->removeZipFile(false);
 $zip->open();
 $files = $zip->extractSpecificsFiles();
+echo '<pre>';
+var_dump($files);
+echo '<pre>';
+
+/**
+ * Example 2
+ *     Extract all files
+ *     Do not remove zip file and temporary file
+ */
+$zip = new Zip('./', 'b.zip', 'allowed2', 'zip2');
+$zip->removeZipFile(false);
+$zip->removeTmpDir(false);
+$zip->open();
+$files = $zip->extractAllFiles();
+echo '<pre>';
+var_dump($files);
+echo '<pre>';
+
+/**
+ * Example 3
+ *     Extract all files
+ *     Do not remove zip file and temporary file
+ *     Set up magic.mime
+ */
+$zip = new Zip('./', 'c.zip', 'allowed3', 'zip3');
+$zip->removeZipFile(false);
+$zip->removeTmpDir(false);
+$zip->setMagicMime( __DIR__ . DIRECTORY_SEPARATOR . 'magic.mime' );
+$zip->open();
+$files = $zip->extractAllFiles();
 echo '<pre>';
 var_dump($files);
 echo '<pre>';

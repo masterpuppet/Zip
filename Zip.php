@@ -54,7 +54,7 @@ class Zip
 	                                  'bmp' => 'image/bmp',
 	                                  'tiff' => 'image/tiff',
 	                                  'tif' => 'image/tiff',
-									  'txt' => 'text/plain', );
+	                                  'txt' => 'text/plain', );
 
 	/**
 	 * Path to magic.mime file

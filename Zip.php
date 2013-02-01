@@ -8,7 +8,7 @@ class Zip
     private $zipFileName;
 
     /**
-     * Base path for all
+     * Base path
      */
     private $basePath;
 
@@ -63,15 +63,20 @@ class Zip
      * array with default accepted mime files
      */
     private $mimeFiles      = array(
-        'jpg' => 'image/jpeg',
+        'jpg' => array(
+            'image/jpeg',
+            'text/plain',
+        ),
         'jpeg' => 'image/jpeg',
         'gif' => 'image/gif',
         'png' => 'image/png',
         'bmp' => 'image/bmp',
         'tiff' => 'image/tiff',
         'tif' => 'image/tiff',
-        'txt' => 'text/plain',
-        'txt' => 'application/x-empty'
+        'txt' => array(
+            'text/plain',
+            'application/x-empty',
+        ),
    );
 
     /**
@@ -266,8 +271,10 @@ class Zip
      *
      * @param $key string Extension value
      *               Example: jpg
-     * @param $value string Mime value
+                              txt
+     * @param $value string|array Mime value
      *               Example: image/jpeg
+     *                        array('text/plan', 'application/x-empty')
      */
     public function setMimeFiles($key, $value)
     {
@@ -277,11 +284,24 @@ class Zip
     /**
      * Get all allowed mimes
      *
+     * @param flatArray boolean If true, flat array to have all values together
+     *     Some extension can have differents mimes for example:
+     *         txt: text/plain | application/x-empty
      * @return array
      */
-    public function getMimeFiles()
+    public function getMimeFiles($flatArray = false)
     {
-        return $this->mimeFiles;
+        $localMimeFiles = array();
+
+        if ($flatArray === true) {
+            array_walk_recursive($this->mimeFiles, function ($value, $key) use (&$localMimeFiles) {
+                $localMimeFiles[] = $value;
+            });
+        } else {
+            $localMimeFiles = $this->mimeFiles;
+        }
+
+        return $localMimeFiles;
     }
 
     /**
@@ -312,13 +332,92 @@ class Zip
     }
 
     /**
-     * Unset specific value in $this->mimeFiles
+     * Get base key from array (Recursively)
+     *
+     * @param $input array
+     * @param $searchValue mixed
+     * @param $strict boolean Default false
+     * @param $keyBase string
+     * @return array
      */
-    public function unsetMime($key)
+    public function arrayKeysRecursive(array $input, $searchValue = null, $strict = false, $keyBase = null)
     {
-        if (array_key_exists($key, $this->mimeFiles) === true) {
-            unset($this->mimeFiles[$key]);
+        $keysFound = array();
+        $keys      = array();
+
+        foreach ($input as $key => $value) {
+            if (($strict === true && $value === $searchValue) || ($strict === false && $value == $searchValue)) {
+                /**
+                 * The key got the path
+                 */
+                $keysFound[$key] = null;
+            }
+
+            if (is_array($value) === true) {
+                $keys[$key] = $this->arrayKeysRecursive($value, $searchValue, $strict);
+            }
+
+            if (empty($keys) === false) {
+                $keysFound = array_merge($keysFound, $keys);
+            }
         }
+
+        return $keysFound;
+    }
+
+    /**
+     * Unset recursively
+     *
+     * @param $arrayKeys array
+     * @param $arrayValues array
+     * @param $specific boolean
+     *     true : if want to unset a specific key (must have the same structure as $arrayValues)
+     *     false: if want to unset in any part of $arrayValues
+     */
+    public function recursiveUnset(array $arrayKeys, array &$arrayValues = array(), $specific = false)
+    {
+        if ($specific === true) {
+            foreach ($arrayKeys as $key => $keyValue) {
+                if (is_array($keyValue) === true) {
+                    $this->recursiveUnset($keyValue, $arrayValues[$key], $specific);
+                }
+                else {
+                    unset($arrayValues[$key]);
+                }
+            }
+        } else {
+            foreach ($arrayValues as $key => &$value) {
+                if (in_array($key, $arrayKeys) === true){
+                    unset($arrayValues[$key]);
+                } elseif(is_array($value) === true) {
+                    $this->recursiveUnset($arrayKeys, $value, $specific);
+                }
+            }
+        }
+    }
+
+    /**
+     * Unset specific mime by key (extension name) in $this->mimeFiles
+     *
+     * @param $key string
+     * @param $specific boolean
+     *     true : if wants to unset a specific key (must have the same structure as $this->mimeFiles)
+     *     false: if want to unset in any part of $this->mimeFiles
+     */
+    public function unsetMimeByKey(array $key, $specific = false)
+    {
+        $this->recursiveUnset($key, $this->mimeFiles, $specific);
+    }
+
+    /**
+     * Unset specific mime by value in $this->mimeFiles
+     *
+     * @param $value string
+     */
+    public function unsetMimeByValue($value)
+    {
+        $this->recursiveUnset($this->arrayKeysRecursive($this->mimeFiles, $value), $this->mimeFiles, true);
+
     }
 
     /**
@@ -331,9 +430,16 @@ class Zip
 
     /**
      * Shortest way to remove all directories structure
+     *
+     * @param $path string Path to remove
+     * @param $addBasePath string 
+     *    true : include the base path
+     *    false: do not include the base path
      */
-    public function rrmdir($path)
+    public function rrmdir($path, $addBasePath = false)
     {
+        $path = realpath((($addBasePath === true) ? ($this->getBasePath() . DIRECTORY_SEPARATOR) : '') . $path);
+
         return (is_file($path) === true)
                ? @unlink($path)
                : (array_map(array($this, 'rrmdir'), glob($path . '/*')) == @rmdir($path));
@@ -434,9 +540,11 @@ class Zip
         $finfo     = new finfo(FILEINFO_MIME, $this->getMagicMime());
         $e         = explode(';', $finfo->file($fileName));
 
-        return array('isDir' => ($e[0] == 'directory'),
-                      'isFile' => ($e[0] != 'directory'),
-                      'isValid' => (empty($mimeFiles) === true || in_array($e[0], $this->getMimeFiles()) === true),);
+        return array(
+            'isDir' => ($e[0] == 'directory'),
+            'isFile' => ($e[0] != 'directory'),
+            'isValid' => (empty($mimeFiles) === true || in_array($e[0], $this->getMimeFiles(true)) === true),
+        );
     }
 
     /**
@@ -634,7 +742,7 @@ class Zip
             $this->zip->close();
 
             if ($this->removeTmpDir === true) {
-                $this->rrmdir($this->getTmpDestinationDir());
+                $this->rrmdir($this->getTmpDestinationDir(), false);
             }
 
             if ($this->removeZipFile === true) {

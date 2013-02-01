@@ -6,7 +6,7 @@ require_once 'Zip.php';
  *     Extract by extension
  *     Remove temporary directory
  */
-$zip = new Zip('./', 'a.zip', 'allowed', 'zip');
+$zip = new Zip('./', 'test.zip', 'zip', 'tmp');
 $zip->removeTmpDir(true);
 $zip->open();
 $files = $zip->extractByExtension();
@@ -23,7 +23,7 @@ echo '<pre>';
  *     Extract all files
  *     Do not remove zip file and temporary file
  */
-$zip = new Zip('./', 'b.zip', 'allowed2', 'zip2');
+$zip = new Zip('./', 'test.zip', 'zip', 'tmp');
 $zip->open();
 $files = $zip->extractAllFiles();
 echo '<pre>';
@@ -39,7 +39,7 @@ echo '<pre>';
  *     Do not remove zip file and temporary file
  *     Set up magic.mime
  */
-$zip = new Zip('./', 'c.zip', 'allowed3', 'zip3');
+$zip = new Zip('./', 'test.zip', 'zip', 'tmp');
 $zip->setMagicMime( __DIR__ . DIRECTORY_SEPARATOR . 'magic.mime' );
 $zip->open();
 $files = $zip->extractAllFiles();
@@ -56,7 +56,7 @@ echo '<pre>';
  *     Remove temporary directory
  *     Set same structure
  */
-$zip = new Zip('./', 'a.zip', 'zip', 'tmp');
+$zip = new Zip('./', 'test.zip', 'zip', 'tmp');
 $zip->open();
 $zip->removeTmpDir(true);
 $zip->setSameStructure(true);

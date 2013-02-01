@@ -90,16 +90,16 @@ class Zip
     private $removeTmpDir   = false;
 
     /**
+     * @param $basePath string Base path of zip
      * @param $fileName string Name of file
      * @param $destinationDir string|null Destination to move allowed files or extract all zip file
      * @param $tmpDestinationDir string|null Destination to extract file and check mime
-     * @param $basePath string Base path of zip
-	 * @throws InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function __construct($basePath = './', $fileName = null, $destinationDir = null, $tmpDestinationDir = null)
     {
         if (empty($basePath) === true) {
-            throw new InvalidArgumentException('$basePath must be a string and cannot be empty');
+            throw new InvalidArgumentException('There must be a base path in $basePath');
         }
 
         $this->setBasePath($basePath);
@@ -288,7 +288,7 @@ class Zip
      * Set path of magic.mime
      *
      * @param $path string|null Path to magic.mime file
-	 * @throws RuntimeException
+     * @throws RuntimeException
      */
     public function setMagicMime($path = null)
     {
@@ -343,7 +343,7 @@ class Zip
      * Zip errors explained
      *
      * @return string
-	 * @throws UnexpectedValueException
+     * @throws UnexpectedValueException
      */
     public function getZipError($error)
     {
@@ -376,7 +376,7 @@ class Zip
 
     /**
      * @param $flags integer
-	 * @throws RuntimeException
+     * @throws RuntimeException
      */
     public function open($flags = 0)
     {
@@ -443,7 +443,7 @@ class Zip
      * Move allowed file to new destination
      *
      * @return array
-	 * @throws InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function moveValidMime(array $moveFiles = array())
     {
@@ -452,11 +452,11 @@ class Zip
         $tmpDestinationDir = $this->getTmpDestinationDir();
 
         if (empty($destinationDir) === true) {
-            throw new InvalidArgumentException('Undefined variable $destinationDir');
+            throw new InvalidArgumentException('There is no a destination declared in $destinationDir');
         }
 
         if (empty($tmpDestinationDir) === true) {
-            throw new InvalidArgumentException('Undefined variable $tmpDestinationDir');
+            throw new InvalidArgumentException('There is no a temporary destination declared in $tmpDestinationDir');
         }
 
         if (empty($moveFiles) === false) {
@@ -515,14 +515,14 @@ class Zip
      * Extract allowed files to temporary directory
      *
      * @return array
-	 * @throws InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function extractByExtension()
     {
         $tmpDestinationDir = $this->getTmpDestinationDir();
 
         if (empty($tmpDestinationDir) === true) {
-            throw new InvalidArgumentException('Undefined variable $tmpDestinationDir');
+            throw new InvalidArgumentException('There is no a temporary destination declared in $tmpDestinationDir');
         }
 
         for ($i = 0; $i < $this->zip->numFiles; $i++) {
@@ -550,7 +550,7 @@ class Zip
      * Extract specifics files
      *
      * @return array
-	 * @throws InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function extractSpecificsFiles()
     {
@@ -558,7 +558,7 @@ class Zip
         $destinationDir = $this->getDestinationDir();
 
         if (empty($destinationDir) === true) {
-            throw new InvalidArgumentException('Undefined variable $destinationDir');
+            throw new InvalidArgumentException('There is no a destination declared in $destinationDir');
         }
 
         for ($i = 0; $i < $this->zip->numFiles; $i++) {
@@ -582,7 +582,7 @@ class Zip
             $tmpDestinationDir = $this->getTmpDestinationDir();
 
             if (empty($tmpDestinationDir) === true) {
-                throw new InvalidArgumentException('Undefined variable $tmpDestinationDir');
+                throw new InvalidArgumentException('There is no a temporary destination declared in $tmpDestinationDir');
             }
 
             $this->zip->extractTo($tmpDestinationDir, $files);
@@ -610,14 +610,14 @@ class Zip
      * Extract all files
      *
      * @return array
-	 * @throws InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function extractAllFiles()
     {
         $destinationDir = $this->getDestinationDir();
 
         if (empty($destinationDir) === true) {
-            throw new InvalidArgumentException('Undefined variable $destinationDir');
+            throw new InvalidArgumentException('There is no a destination declared in $destinationDir');
         }
 
         $this->zip->extractTo($destinationDir);

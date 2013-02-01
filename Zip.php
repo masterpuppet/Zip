@@ -63,10 +63,7 @@ class Zip
      * array with default accepted mime files
      */
     private $mimeFiles      = array(
-        'jpg' => array(
-            'image/jpeg',
-            'text/plain',
-        ),
+        'jpg' => 'image/jpeg',
         'jpeg' => 'image/jpeg',
         'gif' => 'image/gif',
         'png' => 'image/png',
@@ -119,6 +116,86 @@ class Zip
 
         if (empty($destinationDir) === false) {
             $this->setDestinationDir($this->getBasePath() . DIRECTORY_SEPARATOR . $destinationDir);
+        }
+    }
+
+    /**
+     * Zip errors explained
+     *
+     * @return string
+     * @throws UnexpectedValueException
+     */
+    private function getZipError($error)
+    {
+        if (empty($error) === false && array_key_exists($error, $this->zipError) === true) {
+            return $this->zipError[$error];
+        } else {
+            throw new UnexpectedValueException('Error do not exists in this class, check manual for error: ' . $error);
+        }
+    }
+
+    /**
+     * Get base key from array (Recursively)
+     *
+     * @param $input array
+     * @param $searchValue mixed
+     * @param $strict boolean Default false
+     * @param $keyBase string
+     * @return array
+     */
+    protected function arrayKeysRecursive(array $input, $searchValue = null, $strict = false, $keyBase = null)
+    {
+        $keysFound = array();
+        $keys      = array();
+
+        foreach ($input as $key => $value) {
+            if (($strict === true && $value === $searchValue) || ($strict === false && $value == $searchValue)) {
+                /**
+                 * The key got the path
+                 */
+                $keysFound[$key] = null;
+            }
+
+            if (is_array($value) === true) {
+                $keys[$key] = $this->arrayKeysRecursive($value, $searchValue, $strict);
+            }
+
+            if (empty($keys) === false) {
+                $keysFound = array_merge($keysFound, $keys);
+            }
+        }
+
+        return $keysFound;
+    }
+
+    /**
+     * Unset recursively
+     *
+     * @param $keys array
+     * @param $values array
+     * @param $specific boolean
+     *     true : if want to unset a specific key (must have the same structure as $values)
+     *     false: if want to unset in any part of $values
+     */
+    protected function recursiveUnset(array $keys, array &$values = array(), $specific = false)
+    {
+        if ($specific === true) {
+            foreach ($keys as $key => $keyValue) {
+                if (is_array($keyValue) === true) {
+                    $this->recursiveUnset($keyValue, $values[$key], $specific);
+                }
+                else {
+                    unset($values[$key]);
+                }
+            }
+        } else {
+            foreach ($values as $key => &$value) {
+                if (in_array($key, $keys) === true){
+                    unset($values[$key]);
+                } elseif(is_array($value) === true) {
+                    $this->recursiveUnset($keys, $value, $specific);
+                }
+            }
         }
     }
 
@@ -332,92 +409,29 @@ class Zip
     }
 
     /**
-     * Get base key from array (Recursively)
-     *
-     * @param $input array
-     * @param $searchValue mixed
-     * @param $strict boolean Default false
-     * @param $keyBase string
-     * @return array
-     */
-    public function arrayKeysRecursive(array $input, $searchValue = null, $strict = false, $keyBase = null)
-    {
-        $keysFound = array();
-        $keys      = array();
-
-        foreach ($input as $key => $value) {
-            if (($strict === true && $value === $searchValue) || ($strict === false && $value == $searchValue)) {
-                /**
-                 * The key got the path
-                 */
-                $keysFound[$key] = null;
-            }
-
-            if (is_array($value) === true) {
-                $keys[$key] = $this->arrayKeysRecursive($value, $searchValue, $strict);
-            }
-
-            if (empty($keys) === false) {
-                $keysFound = array_merge($keysFound, $keys);
-            }
-        }
-
-        return $keysFound;
-    }
-
-    /**
-     * Unset recursively
-     *
-     * @param $arrayKeys array
-     * @param $arrayValues array
-     * @param $specific boolean
-     *     true : if want to unset a specific key (must have the same structure as $arrayValues)
-     *     false: if want to unset in any part of $arrayValues
-     */
-    public function recursiveUnset(array $arrayKeys, array &$arrayValues = array(), $specific = false)
-    {
-        if ($specific === true) {
-            foreach ($arrayKeys as $key => $keyValue) {
-                if (is_array($keyValue) === true) {
-                    $this->recursiveUnset($keyValue, $arrayValues[$key], $specific);
-                }
-                else {
-                    unset($arrayValues[$key]);
-                }
-            }
-        } else {
-            foreach ($arrayValues as $key => &$value) {
-                if (in_array($key, $arrayKeys) === true){
-                    unset($arrayValues[$key]);
-                } elseif(is_array($value) === true) {
-                    $this->recursiveUnset($arrayKeys, $value, $specific);
-                }
-            }
-        }
-    }
-
-    /**
      * Unset specific mime by key (extension name) in $this->mimeFiles
      *
-     * @param $key string
+     * @param $keys string
      * @param $specific boolean
      *     true : if wants to unset a specific key (must have the same structure as $this->mimeFiles)
      *     false: if want to unset in any part of $this->mimeFiles
      */
-    public function unsetMimeByKey(array $key, $specific = false)
+    public function unsetMimeByKey(array $keys, $specific = false)
     {
-        $this->recursiveUnset($key, $this->mimeFiles, $specific);
+        $this->recursiveUnset($keys, $this->mimeFiles, $specific);
+        var_dump($this->mimeFiles);exit;
     }
 
     /**
      * Unset specific mime by value in $this->mimeFiles
      *
-     * @param $value string
+     * @param $values array
      */
-    public function unsetMimeByValue($value)
+    public function unsetMimeByValue(array $values)
     {
-        $this->recursiveUnset($this->arrayKeysRecursive($this->mimeFiles, $value), $this->mimeFiles, true);
-
+        foreach ($values as $value) {
+            $this->recursiveUnset($this->arrayKeysRecursive($this->mimeFiles, $value), $this->mimeFiles, true);
+        }
     }
 
     /**
@@ -443,21 +457,6 @@ class Zip
         return (is_file($path) === true)
                ? @unlink($path)
                : (array_map(array($this, 'rrmdir'), glob($path . '/*')) == @rmdir($path));
-    }
-
-    /**
-     * Zip errors explained
-     *
-     * @return string
-     * @throws UnexpectedValueException
-     */
-    public function getZipError($error)
-    {
-        if (empty($error) === false && array_key_exists($error, $this->zipError) === true) {
-            return $this->zipError[$error];
-        } else {
-            throw new UnexpectedValueException('Error do not exists in this class, check manual for error: ' . $error);
-        }
     }
 
     /**

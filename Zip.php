@@ -94,6 +94,7 @@ class Zip
      * @param $destinationDir string|null Destination to move allowed files or extract all zip file
      * @param $tmpDestinationDir string|null Destination to extract file and check mime
      * @param $basePath string Base path of zip
+	 * @throws InvalidArgumentException
      */
     public function __construct($basePath = './', $fileName = null, $destinationDir = null, $tmpDestinationDir = null)
     {
@@ -287,6 +288,7 @@ class Zip
      * Set path of magic.mime
      *
      * @param $path string|null Path to magic.mime file
+	 * @throws RuntimeException
      */
     public function setMagicMime($path = null)
     {
@@ -341,13 +343,14 @@ class Zip
      * Zip errors explained
      *
      * @return string
+	 * @throws UnexpectedValueException
      */
     public function getZipError($error)
     {
         if (empty($error) === false && array_key_exists($error, $this->zipError) === true) {
             return $this->zipError[$error];
         } else {
-            return 'Error do not exists in this class check manual for error: ' . $error;
+            throw new UnexpectedValueException('Error do not exists in this class, check manual for error: ' . $error);
         }
     }
 
@@ -373,6 +376,7 @@ class Zip
 
     /**
      * @param $flags integer
+	 * @throws RuntimeException
      */
     public function open($flags = 0)
     {
@@ -381,8 +385,7 @@ class Zip
         if ($open === true) {
             $this->zip = $zip;
         } else {
-            echo '<pre>' . $this->getZipError($open) . '<pre>';
-            exit;
+            throw new RuntimeException($this->getZipError($open));
         }
 
     }
@@ -440,6 +443,7 @@ class Zip
      * Move allowed file to new destination
      *
      * @return array
+	 * @throws InvalidArgumentException
      */
     public function moveValidMime(array $moveFiles = array())
     {
@@ -511,6 +515,7 @@ class Zip
      * Extract allowed files to temporary directory
      *
      * @return array
+	 * @throws InvalidArgumentException
      */
     public function extractByExtension()
     {
@@ -545,6 +550,7 @@ class Zip
      * Extract specifics files
      *
      * @return array
+	 * @throws InvalidArgumentException
      */
     public function extractSpecificsFiles()
     {
@@ -604,6 +610,7 @@ class Zip
      * Extract all files
      *
      * @return array
+	 * @throws InvalidArgumentException
      */
     public function extractAllFiles()
     {

@@ -419,7 +419,6 @@ class Zip
     public function unsetMimeByKey(array $keys, $specific = false)
     {
         $this->recursiveUnset($keys, $this->mimeFiles, $specific);
-        var_dump($this->mimeFiles);exit;
     }
 
     /**

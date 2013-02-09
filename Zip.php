@@ -52,25 +52,25 @@ class Zip
         ZIPARCHIVE::ER_INCONS => 'Zip archive inconsistent',
         ZIPARCHIVE::ER_INVAL  => 'Invalid argument',
         ZIPARCHIVE::ER_MEMORY => 'Malloc failure',
-        ZIPARCHIVE::ER_NOENT => 'No such file',
-        ZIPARCHIVE::ER_NOZIP => 'Not a zip archive',
-        ZIPARCHIVE::ER_OPEN => 'Can\'t open file',
-        ZIPARCHIVE::ER_READ => 'Read error',
-        ZIPARCHIVE::ER_SEEK => 'Seek error'
+        ZIPARCHIVE::ER_NOENT  => 'No such file',
+        ZIPARCHIVE::ER_NOZIP  => 'Not a zip archive',
+        ZIPARCHIVE::ER_OPEN   => 'Can\'t open file',
+        ZIPARCHIVE::ER_READ   => 'Read error',
+        ZIPARCHIVE::ER_SEEK   => 'Seek error'
    );
 
     /**
      * array with default accepted mime files
      */
     private $mimeFiles      = array(
-        'jpg' => 'image/jpeg',
+        'jpg'  => 'image/jpeg',
         'jpeg' => 'image/jpeg',
-        'gif' => 'image/gif',
-        'png' => 'image/png',
-        'bmp' => 'image/bmp',
+        'gif'  => 'image/gif',
+        'png'  => 'image/png',
+        'bmp'  => 'image/bmp',
         'tiff' => 'image/tiff',
-        'tif' => 'image/tiff',
-        'txt' => array(
+        'tif'  => 'image/tiff',
+        'txt'  => array(
             'text/plain',
             'application/x-empty',
         ),

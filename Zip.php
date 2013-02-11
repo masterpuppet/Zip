@@ -3,14 +3,14 @@
 class Zip
 {
     /**
-     * Zip file name
-     */
-    private $zipFileName;
-
-    /**
      * Base path
      */
     private $basePath;
+
+    /**
+     * Zip file name
+     */
+    private $zipFileName;
 
     /**
      * ZipArchive object
@@ -69,8 +69,8 @@ class Zip
         'png'  => 'image/png',
         'bmp'  => 'image/bmp',
         'tiff' => 'image/tiff',
-        'tif'  => 'image/tiff',
-        'txt'  => array(
+        'tif' => 'image/tiff',
+        'txt' => array(
             'text/plain',
             'application/x-empty',
         ),
@@ -92,10 +92,10 @@ class Zip
     private $removeTmpDir   = false;
 
     /**
-     * @param $basePath string Base path of zip
-     * @param $fileName string Name of file
-     * @param $destinationDir string|null Destination to move allowed files or extract all zip file
-     * @param $tmpDestinationDir string|null Destination to extract file and check mime
+     * @param string $basePath Base path of zip
+     * @param string $fileName Name of file
+     * @param string|null $destinationDir Destination to move allowed files or extract all zip file
+     * @param string|null $tmpDestinationDir Destination to extract file and check mime
      * @throws InvalidArgumentException
      */
     public function __construct($basePath = './', $fileName = null, $destinationDir = null, $tmpDestinationDir = null)
@@ -137,10 +137,10 @@ class Zip
     /**
      * Get base key from array (Recursively)
      *
-     * @param $input array
-     * @param $searchValue mixed
-     * @param $strict boolean Default false
-     * @param $keyBase string
+     * @param array $input
+     * @param mixed $searchValue
+     * @param boolean $strict Default false
+     * @param string $keyBase
      * @return array
      */
     protected function arrayKeysRecursive(array $input, $searchValue = null, $strict = false, $keyBase = null)
@@ -171,9 +171,9 @@ class Zip
     /**
      * Unset recursively
      *
-     * @param $keys array
-     * @param $values array
-     * @param $specific boolean
+     * @param array $keys
+     * @param array $values
+     * @param boolean $specific
      *     true : if want to unset a specific key (must have the same structure as $values)
      *     false: if want to unset in any part of $values
      */
@@ -202,7 +202,7 @@ class Zip
     /**
      * Set base path directory
      *
-     * @param $basePath string
+     * @param string $basePath
      */
     public function setBasePath($basePath)
     {
@@ -226,7 +226,7 @@ class Zip
     /**
      * Zip file name
      *
-     * @param $fileName string
+     * @param string $fileName
      */
     public function setZipFileName($fileName)
     {
@@ -246,7 +246,7 @@ class Zip
     /**
      * Limit files to extracts
      *
-     * @param $file string
+     * @param string $file
      */
     public function setFilesToExtract($file)
     {
@@ -266,7 +266,7 @@ class Zip
     /**
      * Set destination directory
      *
-     * @param $destinationDir string
+     * @param string $destinationDir
      */
     public function setDestinationDir($destinationDir)
     {
@@ -290,7 +290,7 @@ class Zip
     /**
      * Set temporary destination directory
      *
-     * @param $tmpDestinationDir string
+     * @param string $tmpDestinationDir
      */
     public function setTmpDestinationDir($tmpDestinationDir)
     {
@@ -312,7 +312,7 @@ class Zip
     }
 
     /**
-     * @param $bool boolean
+     * @param boolean $bool
      */
     public function setGreedy($bool)
     {
@@ -328,7 +328,7 @@ class Zip
     }
 
     /**
-     * @param $bool boolean
+     * @param boolean $bool
      */
     public function setSameStructure($bool)
     {
@@ -346,10 +346,10 @@ class Zip
     /**
      * Set allowed mime
      *
-     * @param $key string Extension value
+     * @param string $key Extension value
      *               Example: jpg
                               txt
-     * @param $value string|array Mime value
+     * @param string|array $value Mime value
      *               Example: image/jpeg
      *                        array('text/plan', 'application/x-empty')
      */
@@ -361,7 +361,7 @@ class Zip
     /**
      * Get all allowed mimes
      *
-     * @param flatArray boolean If true, flat array to have all values together
+     * @param boolean $flatArray If true, flat array to have all values together
      *     Some extension can have differents mimes for example:
      *         txt: text/plain | application/x-empty
      * @return array
@@ -384,7 +384,7 @@ class Zip
     /**
      * Set path of magic.mime
      *
-     * @param $path string|null Path to magic.mime file
+     * @param string|null $path Path to magic.mime file
      * @throws RuntimeException
      */
     public function setMagicMime($path = null)
@@ -411,8 +411,8 @@ class Zip
     /**
      * Unset specific mime by key (extension name) in $this->mimeFiles
      *
-     * @param $keys string
-     * @param $specific boolean
+     * @param string $keys
+     * @param boolean $specific
      *     true : if wants to unset a specific key (must have the same structure as $this->mimeFiles)
      *     false: if want to unset in any part of $this->mimeFiles
      */
@@ -424,7 +424,7 @@ class Zip
     /**
      * Unset specific mime by value in $this->mimeFiles
      *
-     * @param $values array
+     * @param array $values
      */
     public function unsetMimeByValue(array $values)
     {
@@ -444,8 +444,8 @@ class Zip
     /**
      * Shortest way to remove all directories structure
      *
-     * @param $path string Path to remove
-     * @param $addBasePath string 
+     * @param string $path Path to remove
+     * @param string $addBasePath
      *    true : include the base path
      *    false: do not include the base path
      */
@@ -461,7 +461,7 @@ class Zip
     /**
      * Remove zip file
      *
-     * @param $bool boolean
+     * @param boolean $bool
      */
     public function removeZipFile($bool)
     {
@@ -471,7 +471,7 @@ class Zip
     /**
      * Remove temporary directory
      *
-     * @param $bool boolean
+     * @param boolean $bool
      */
     public function removeTmpDir($bool)
     {
@@ -479,7 +479,7 @@ class Zip
     }
 
     /**
-     * @param $flags integer
+     * @param integer $flags
      * @throws RuntimeException
      */
     public function open($flags = 0)
@@ -497,7 +497,7 @@ class Zip
     /**
      * Iterate directory
      *
-     * @param $path string Path to iterate
+     * @param string $path Path to iterate
      */
     public function iterateDir($path)
     {
@@ -530,7 +530,7 @@ class Zip
     }
 
     /**
-     * @param $fileName string
+     * @param string $fileName
      */
     public function isValidMime($fileName)
     {
@@ -548,6 +548,7 @@ class Zip
     /**
      * Move allowed file to new destination
      *
+     * @param array $moveFiles
      * @return array
      * @throws InvalidArgumentException
      */

@@ -78,7 +78,7 @@ class Extract extends Zip
     /**
      * Limit files to extracts
      *
-     * @param string $file
+     * @param array $file
      */
     public function setFilesToExtract(array $file)
     {

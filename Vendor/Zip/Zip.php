@@ -149,7 +149,7 @@ class Zip
         if (empty($fileName) === true) {
             throw new \RuntimeException('$fileName cannot be empty');
         }
-        $zip = new ZipArchive();
+        $zip  = new ZipArchive();
         $open = $zip->open($fileName, $flags);
         if ($open === true) {
             $this->zip = $zip;

@@ -10,16 +10,22 @@ class Extract extends Zip
 {
     /**
      * array with files to extract
+     *
+     * @var array
      */
     protected $filesToExtract = array();
 
     /**
      * Destination directory
+     *
+     * @var string
      */
     protected $destinationDir;
 
     /**
      * Destination temporary directory
+     *
+     * @var string
      */
     protected $tmpDestinationDir;
 
@@ -27,23 +33,50 @@ class Extract extends Zip
      * Set up if search must check everything or be specific
      *    true : everything
      *    false: specific
+     *
+     * @var boolean
      */
     protected $greedy         = true;
 
     /**
      * Stay with same structure
+     *
+     * @var boolean
      */
     protected $sameStructure  = true;
 
     /**
+     * Stay with same file name
+     *
+     * @var boolean
+     */
+    protected $sameName       = true;
+
+    /**
+     * Setup in name a suffix
+     *
+     * @var string
+     */
+    protected $suffix;
+
+    /**
+     * @var string
+     */
+    protected $separator      = '_';
+
+    /**
      * Boolean to remove zip file
+     *
+     * @var boolean
      */
     protected $removeZipFile  = false;
 
     /**
      * Boolean to remove temporary directory
+     *
+     * @var boolean
      */
-    protected $removeTmpDir   = false;
+    protected $removeTmpDir   = true;
 
    /**
      * @param string $basePath               Base path of zip
@@ -146,33 +179,80 @@ class Extract extends Zip
     /**
      * @param boolean $bool
      */
-    public function setGreedy($bool)
+    public function greedy($bool)
     {
         $this->greedy = $bool;
     }
 
     /**
-     * Get if search must check everything of specific
-     */
-    public function getGreedy()
-    {
-        return $this->greedy;
-    }
-
-    /**
      * @param boolean $bool
      */
-    public function setSameStructure($bool)
+    public function sameStructure($bool)
     {
         $this->sameStructure = $bool;
     }
 
     /**
-     * Get same structure or file only
+     * @param boolean $bool
      */
-    public function getSameStructure()
+    public function sameName($bool)
     {
-        return $this->sameStructure;
+        $this->sameName = $bool;
+    }
+
+    /**
+     * @param string $file
+     * @return string
+     */
+    protected function addSuffix($file)
+    {
+        $suffix = $this->getSuffix();
+        if (empty($suffix) === true) {
+            $suffix = $this->getSeparator() . microtime(true);
+        }
+        $pathInfo = pathinfo($file);
+
+        return $pathInfo['filename'] . $suffix . '.' . $pathInfo['extension'];
+    }
+
+    /**
+     * If set, it mean that want to add the suffix, so sameName must be set to false
+     *
+     * @param string      $suffix
+     * @param null|string $separator
+     */
+    public function setSuffix($suffix, $separator = null)
+    {
+        $separator    = (empty($separator) === true)
+                      ? $this->getSeparator()
+                      : $separator;
+        $this->suffix = $separator . $suffix;
+
+        $this->sameName(false);
+    }
+
+    /**
+     * @return string
+     */
+    public function getSuffix()
+    {
+        return $this->suffix;
+    }
+
+    /**
+     * @param string $separator
+     */
+    public function setSeparator($separator)
+    {
+        $this->separator = $separator;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSeparator()
+    {
+        return $this->separator;
     }
 
     /**
@@ -221,7 +301,7 @@ class Extract extends Zip
         $files = array();
 
         foreach ($this->iterateDir($path) as $k => $v) {
-            $files[] = $v;
+            $files[] = $v->getRealPath();
         }
 
         return $files;
@@ -234,7 +314,7 @@ class Extract extends Zip
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function moveValidMime(array $moveFiles = array())
+    public function moveValidFiles(array $moveFiles = array())
     {
         $filesMoved        = array();
         $destinationDir    = $this->getDestinationDir();
@@ -248,56 +328,55 @@ class Extract extends Zip
             throw new \InvalidArgumentException('There is no a temporary destination declared in $tmpDestinationDir');
         }
 
-        if (empty($moveFiles) === false) {
-            foreach ($moveFiles as $file) {
-                $tmpFile = realpath($tmpDestinationDir . DIRECTORY_SEPARATOR . $file);
+        foreach ($moveFiles as $file) {
+            $tmpFile = realpath($tmpDestinationDir . DIRECTORY_SEPARATOR . $file);
 
-                if (empty($tmpFile) === false) {
-                    $mime = Mime::isValidMime($tmpFile);
+            if (empty($tmpFile) === false) {
+                $mime = Mime::isValidMime($tmpFile);
 
-                    if ($mime['isValid'] === true) {
-                        $pathInfo = pathinfo($file);
-                        $destination = $destinationDir . DIRECTORY_SEPARATOR
-                                     . $pathInfo['dirname'] . DIRECTORY_SEPARATOR;
+                if ($mime['isValid'] === true) {
+                    $basename    = basename($file);
+                    $destination = $destinationDir . DIRECTORY_SEPARATOR;
+
+                    if ($this->sameStructure === true) {
+                        $destination .= dirname($file) . DIRECTORY_SEPARATOR;
 
                         /**
                          * mkdir send an error if one of the directories exists
                          */
                         @mkdir($destination, '0666', true);
-
-                        $destination .= $pathInfo['filename'] . '.' . $pathInfo['extension'];
-
-                        if (copy($tmpFile, $destination) === true) {
-                            $filesMoved[] = array('original' => $tmpFile,
-                                                   'destination' => $destination,);
-                        }
                     }
-                }
-            }
-        } else {
-            $it = $this->iterateDir($tmpDestinationDir);
 
-            if ($it !== false) {
-                foreach ($it as $k => $v) {
-                    $mime = Mime::isValidMime($v);
+                    if ($this->sameName === false) {
+                        $destination .= $this->addSuffix($basename);
+                    } else {
+                        $destination .= $basename;
+                    }
 
-                    if ($mime['isValid'] === true) {
-                        $pathInfo    = pathinfo($v);
-                        $destination = $destinationDir . DIRECTORY_SEPARATOR
-                                     . $pathInfo['filename'] . '_' . microtime(true)
-                                     . '.' . $pathInfo['extension'];
-                        if (copy($v, $destination) === true) {
-                            $filesMoved[] = array(
-                                'original' => $v,
-                                'destination' => $destination,
-                            );
-                        }
+                    if (copy($tmpFile, $destination) === true) {
+                        $filesMoved[] = realpath($destination);
                     }
                 }
             }
         }
 
         return $filesMoved;
+    }
+
+    /**
+     * @param array $files
+     */
+    public function extractFiles(array $files)
+    {
+        $tmpDestinationDir = $this->getTmpDestinationDir();
+
+        if (empty($tmpDestinationDir) === true) {
+            throw new \InvalidArgumentException('There is no a temporary destination declared in $tmpDestinationDir');
+        }
+
+        $this->zip->extractTo($tmpDestinationDir, $files);
+
+        return $this->moveValidFiles($files);
     }
 
     /**
@@ -308,12 +387,6 @@ class Extract extends Zip
      */
     public function extractByExtension()
     {
-        $tmpDestinationDir = $this->getTmpDestinationDir();
-
-        if (empty($tmpDestinationDir) === true) {
-            throw new \InvalidArgumentException('There is no a temporary destination declared in $tmpDestinationDir');
-        }
-
         for ($i = 0; $i < $this->zip->numFiles; $i++) {
             $file     = $this->zip->statIndex($i);
             $pathInfo = pathinfo($file['name']);
@@ -324,15 +397,13 @@ class Extract extends Zip
                 /**
                  * Include by specific extension or all if empty Mime::mimeFiles
                  */
-                if ((array_key_exists($pathInfo['extension'], $mimeFiles) === true) || (empty($mimeFiles) === true)) {
+                if (array_key_exists($pathInfo['extension'], $mimeFiles) === true) {
                     $this->setFileToExtract($file['name']);
                 }
             }
         }
 
-        $this->zip->extractTo($tmpDestinationDir, $this->getFilesToExtract());
-
-        return $this->moveValidMime();
+        return $this->extractFiles($this->getFilesToExtract());
     }
 
     /**
@@ -343,13 +414,7 @@ class Extract extends Zip
      */
     public function extractSpecificsFiles()
     {
-        $files             = array();
-        $destinationDir = $this->getDestinationDir();
-
-        if (empty($destinationDir) === true) {
-            throw new \InvalidArgumentException('There is no a destination declared in $destinationDir');
-        }
-
+        $files          = array();
         for ($i = 0; $i < $this->zip->numFiles; $i++) {
             $file     = $this->zip->statIndex($i);
             $pathInfo = pathinfo($file['name']);
@@ -360,39 +425,16 @@ class Extract extends Zip
                 /**
                  * Check first if user write full path or check if user only write the name of the file and want to check everything
                  */
-                if(in_array($file, $this->getFilesToExtract()) === true
-                    || (in_array($fileName, $this->getFilesToExtract()) === true && $this->getGreedy() === true)){
+                if (
+                    in_array($file, $this->getFilesToExtract()) === true
+                    || (in_array($fileName, $this->getFilesToExtract()) === true && $this->greedy === true)
+                ){
                     $files[] = $file['name'];
                 }
             }
         }
 
-        if ($this->getSameStructure() === true) {
-            $tmpDestinationDir = $this->getTmpDestinationDir();
-
-            if (empty($tmpDestinationDir) === true) {
-                throw new \InvalidArgumentException('There is no a temporary destination declared in $tmpDestinationDir');
-            }
-
-            $this->zip->extractTo($tmpDestinationDir, $files);
-
-            return $this->moveValidMime($files);
-        } else {
-            $this->zip->extractTo($destinationDir, $files);
-
-            /**
-             * Verify if is a valid mime
-             */
-            foreach ($files as $file) {
-                $file = realpath($destinationDir . DIRECTORY_SEPARATOR . $file);
-
-                if (empty($file) === false && Mime::isValidMime($file) === false) {
-                    unlink($file);
-                }
-            }
-
-            return $files;
-        }
+        return $this->extractFiles($files);
     }
 
     /**
@@ -403,19 +445,24 @@ class Extract extends Zip
      */
     public function extractAllFiles()
     {
+        $files          = array();
         $destinationDir = $this->getDestinationDir();
 
         if (empty($destinationDir) === true) {
             throw new \InvalidArgumentException('There is no a destination declared in $destinationDir');
         }
 
+        for ($i = 0; $i < $this->zip->numFiles; $i++) {
+            $files[] = $this->zip->getNameIndex($i);
+        }
+
         $this->zip->extractTo($destinationDir);
 
-        return $this->listFiles($destinationDir);
+        return $files;
     }
 
     /**
-     * Close object ZipArchive()
+     * Close object \ZipArchive()
      */
     public function __destruct()
     {

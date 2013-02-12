@@ -70,71 +70,6 @@ class Zip
     }
 
     /**
-     * Get base key from array (Recursively)
-     *
-     * @param array   $input
-     * @param mixed   $searchValue
-     * @param boolean $strict Default false
-     * @param string  $keyBase
-     * @return array
-     */
-    protected function arrayKeysRecursive(array $input, $searchValue = null, $strict = false, $keyBase = null)
-    {
-        $keysFound = array();
-        $keys      = array();
-
-        foreach ($input as $key => $value) {
-            if (($strict === true && $value === $searchValue) || ($strict === false && $value == $searchValue)) {
-                /**
-                 * The key got the path
-                 */
-                $keysFound[$key] = null;
-            }
-
-            if (is_array($value) === true) {
-                $keys[$key] = $this->arrayKeysRecursive($value, $searchValue, $strict);
-            }
-
-            if (empty($keys) === false) {
-                $keysFound = array_merge($keysFound, $keys);
-            }
-        }
-
-        return $keysFound;
-    }
-
-    /**
-     * Unset recursively
-     *
-     * @param array $keys
-     * @param array $values
-     * @param boolean $specific
-     *     true : if want to unset a specific key (must have the same structure as $values)
-     *     false: if want to unset in any part of $values
-     */
-    protected function recursiveUnset(array $keys, array &$values = array(), $specific = false)
-    {
-        if ($specific === true) {
-            foreach ($keys as $key => $keyValue) {
-                if (is_array($keyValue) === true) {
-                    $this->recursiveUnset($keyValue, $values[$key], $specific);
-                }
-                else {
-                    unset($values[$key]);
-                }
-            }
-        } else {
-            foreach ($values as $key => &$value) {
-                if (in_array($key, $keys) === true){
-                    unset($values[$key]);
-                } elseif(is_array($value) === true) {
-                    $this->recursiveUnset($keys, $value, $specific);
-                }
-            }
-        }
-    }
-
-    /**
      * Set base path directory
      *
      * @param string $basePath
@@ -192,6 +127,9 @@ class Zip
                   ? ($this->getBasePath() . DIRECTORY_SEPARATOR)
                   : '';
         $path     = realpath($basePath . $path);
+        if (empty($path) === true) {
+            return false;
+        }
 
         return (is_file($path) === true)
             ? @unlink($path)

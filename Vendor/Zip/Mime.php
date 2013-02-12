@@ -53,7 +53,7 @@ class Mime
      * @param string $fileName
      * @throws \RuntimeException
      */
-    public function isValidMime($fileName)
+    public static function isValidMime($fileName)
     {
         $isValid   = false;
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -73,23 +73,57 @@ class Mime
         return array(
             'isDir'   => ($e[0] == 'directory'),
             'isFile'  => ($e[0] != 'directory'),
-            'isValid' => (empty($mimeFiles) === true || $isValid === true),
+            'isValid' => ($isValid === true),
         );
+    }
+
+    /**
+     * Get base key from array (Recursively)
+     *
+     * @param array   $input
+     * @param mixed   $searchValue
+     * @param boolean $strict Default false
+     * @param string  $keyBase
+     * @return array
+     */
+    public static function arrayKeysRecursive(array $input, $searchValue = null, $strict = false, $keyBase = null)
+    {
+        $keysFound = array();
+        $keys      = array();
+
+        foreach ($input as $key => $value) {
+            if (($strict === true && $value === $searchValue) || ($strict === false && $value == $searchValue)) {
+                /**
+                 * The key got the path
+                 */
+                $keysFound[$key] = null;
+            }
+
+            if (is_array($value) === true) {
+                $keys[$key] = self::arrayKeysRecursive($value, $searchValue, $strict);
+            }
+
+            if (empty($keys) === false) {
+                $keysFound = array_merge($keysFound, $keys);
+            }
+        }
+
+        return $keysFound;
     }
 
     /**
      * Set allowed mime
      *
-     * @param string $key Extension value
+     * @param string $extension Extension value
      *               Example: jpg
                               txt
-     * @param string|array $value Mime value
+     * @param string|array $mime Mime value
      *               Example: image/jpeg
      *                        array('text/plan', 'application/x-empty')
      */
-    public static function setMimeFiles($key, $value)
+    public static function setMimeFiles($extension, $mime)
     {
-        self::$mimeFiles[$key] = $value;
+        self::$mimeFiles[$extension] = $mime;
     }
 
     /**
@@ -105,8 +139,8 @@ class Mime
         $localMimeFiles = array();
 
         if ($flatArray === true) {
-            array_walk_recursive(self::$mimeFiles, function ($value, $key) use (&$localMimeFiles) {
-                $localMimeFiles[] = $value;
+            array_walk_recursive(self::$mimeFiles, function ($mime, $extension) use (&$localMimeFiles) {
+                $localMimeFiles[] = $mime;
             });
         } else {
             $localMimeFiles = self::$mimeFiles;
@@ -140,6 +174,37 @@ class Mime
     public static function getMagicMime()
     {
         return self::$magicMime;
+    }
+
+    /**
+     * Unset recursively
+     *
+     * @param array $keys
+     * @param array $values
+     * @param boolean $specific
+     *     true : if want to unset a specific key (must have the same structure as $values)
+     *     false: if want to unset in any part of $values
+     */
+    protected function recursiveUnset(array $keys, array &$values = array(), $specific = false)
+    {
+        if ($specific === true) {
+            foreach ($keys as $key => $keyValue) {
+                if (is_array($keyValue) === true) {
+                    self::recursiveUnset($keyValue, $values[$key], $specific);
+                }
+                else {
+                    unset($values[$key]);
+                }
+            }
+        } else {
+            foreach ($values as $key => &$value) {
+                if (in_array($key, $keys) === true){
+                    unset($values[$key]);
+                } elseif(is_array($value) === true) {
+                    self::recursiveUnset($keys, $value, $specific);
+                }
+            }
+        }
     }
 
     /**

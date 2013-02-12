@@ -51,7 +51,6 @@ class Mime
 
     /**
      * @param string $fileName
-     * @throws \RuntimeException
      */
     public static function isValidMime($fileName)
     {
@@ -61,7 +60,11 @@ class Mime
         $finfo     = new \finfo(FILEINFO_MIME, self::getMagicMime());
         $e         = explode(';', $finfo->file($fileName));
         if (empty($e[0]) === true) {
-            throw new \RuntimeException('Error getting mime type from "' . $fileName . '"');
+            return array(
+                'isDir'   => false,
+                'isFile'  => false,
+                'isValid' => false,
+            );
         }
 
         if (array_key_exists($extension, $mimeFiles) === true && is_array($mimeFiles[$extension]) === true) {

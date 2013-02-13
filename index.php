@@ -9,10 +9,12 @@ echo '<pre>';
  * Example 1
  *     Extract all files
  */
-$zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
-$files = $zip->open()
-             ->extractAllFiles();
-var_dump($files);
+$zip = new \Zip\Create('./');
+$zip->create('zipfile')
+    ->addFullDir('zip')
+    ->addFromString('test.txt', 'work')
+    ->addEmptyDir('directory');
+echo $zip->getZip()->numFiles;exit;
 
 /**
  * Example 2
@@ -57,5 +59,17 @@ $zip = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
 $files = $zip->open()
              ->extractAllFiles();
 var_dump($files);
+
+
+/**
+ * Example 5
+ *     create zip file
+ */
+$zip = new \Zip\Create('./');
+$zip->create('zipfile')
+    ->addFullDir('zip')
+    ->addFromString('test.txt', 'work')
+    ->addEmptyDir('directory');
+echo $zip->getZip()->numFiles;
 
 echo '</pre>';

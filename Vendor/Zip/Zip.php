@@ -83,6 +83,7 @@ class Zip
     /**
      * @param null|string $fileName
      * @param integer     $flags
+     * @return \Zip
      * @throws \RuntimeException
      */
     public function open($fileName = null, $flags = 0)
@@ -122,6 +123,7 @@ class Zip
 
     /**
      * @param string $basePath Base path directory
+     * @return \Zip
      */
     public function setBasePath($basePath)
     {
@@ -138,6 +140,7 @@ class Zip
 
     /**
      * @return string Base path directory
+     * @return \Zip
      */
     public function getBasePath()
     {
@@ -146,6 +149,7 @@ class Zip
 
     /**
      * @param string $fileName Zip file name
+     * @return \Zip
      */
     public function setZipFileName($fileName)
     {
@@ -163,7 +167,16 @@ class Zip
     }
 
     /**
+     * @return ZipArchive
+     */
+    public function getZip()
+    {
+        return $this->zip;
+    }
+
+    /**
      * @param string $mode
+     * @return \Zip
      */
     public function setMode($mode)
     {
@@ -239,5 +252,29 @@ class Zip
         }
 
         return rmdir($path);
+    }
+
+    /**
+     * @throws \BadMethodCallException
+     */
+    public function __call($method, $arguments)
+    {
+        if (method_exists($this->zip, $method) === true) {
+            call_user_func_array(array($this->zip, $method), $arguments);
+        } else {
+            throw new \BadMethodCallException('Method "' .  __CLASS__ . '::' . $method . '" do not exists');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Close object \ZipArchive()
+     */
+    public function __destruct()
+    {
+        if (($this->zip instanceof ZipArchive) === true) {
+            $this->zip->close();
+        }
     }
 }

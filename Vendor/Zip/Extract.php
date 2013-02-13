@@ -100,6 +100,7 @@ class Extract extends Zip
      * Limit files to extracts
      *
      * @param string $file
+     * @return \Zip
      */
     public function setFileToExtract($file)
     {
@@ -112,6 +113,7 @@ class Extract extends Zip
      * Limit files to extracts
      *
      * @param array $file
+     * @return \Zip
      */
     public function setFilesToExtract(array $file)
     {
@@ -134,6 +136,7 @@ class Extract extends Zip
      * Set destination directory
      *
      * @param string $destinationDir
+     * @return \Zip
      */
     public function setDestinationDir($destinationDir)
     {
@@ -160,6 +163,7 @@ class Extract extends Zip
      * Set temporary destination directory
      *
      * @param string $tmpDestinationDir
+     * @return \Zip
      */
     public function setTmpDestinationDir($tmpDestinationDir)
     {
@@ -184,6 +188,7 @@ class Extract extends Zip
 
     /**
      * @param boolean $bool
+     * @return \Zip
      */
     public function greedy($bool)
     {
@@ -194,6 +199,7 @@ class Extract extends Zip
 
     /**
      * @param boolean $bool
+     * @return \Zip
      */
     public function sameStructure($bool)
     {
@@ -204,6 +210,7 @@ class Extract extends Zip
 
     /**
      * @param boolean $bool
+     * @return \Zip
      */
     public function sameName($bool)
     {
@@ -232,6 +239,7 @@ class Extract extends Zip
      *
      * @param string      $suffix
      * @param null|string $separator
+     * @return \Zip
      */
     public function setSuffix($suffix, $separator = null)
     {
@@ -255,6 +263,7 @@ class Extract extends Zip
 
     /**
      * @param string $separator
+     * @return \Zip
      */
     public function setSeparator($separator)
     {
@@ -275,6 +284,7 @@ class Extract extends Zip
      * Remove zip file
      *
      * @param boolean $bool
+     * @return \Zip
      */
     public function removeZipFile($bool)
     {
@@ -287,6 +297,7 @@ class Extract extends Zip
      * Remove temporary directory
      *
      * @param boolean $bool
+     * @return \Zip
      */
     public function removeTmpDir($bool)
     {
@@ -469,16 +480,12 @@ class Extract extends Zip
      */
     public function __destruct()
     {
-        if (($this->zip instanceof ZipArchive) === true) {
-            $this->zip->close();
+        if ($this->removeTmpDir === true) {
+            $this->removeFiles($this->getTmpDestinationDir());
+        }
 
-            if ($this->removeTmpDir === true) {
-                $this->removeFiles($this->getTmpDestinationDir());
-            }
-
-            if ($this->removeZipFile === true) {
-                unlink($this->zipFileName);
-            }
+        if ($this->removeZipFile === true) {
+            unlink($this->zipFileName);
         }
     }
 }

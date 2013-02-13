@@ -9,10 +9,10 @@ echo '<pre>';
  * Example 1
  *     Extract all files
  */
-// $zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
-// $files = $zip->open()
-             // ->extractAllFiles();
-// var_dump($files);
+$zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
+$files = $zip->open()
+             ->extractAllFiles();
+var_dump($files);
 
 /**
  * Example 2
@@ -23,8 +23,7 @@ $zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
 $files = $zip->open()
              ->setSuffix(date('Y-m-d'))
              ->extractByExtension();
-//var_dump($files);
-exit;
+var_dump($files);
 
 /**
  * Example 3
@@ -52,7 +51,7 @@ var_dump($files);
  *     Extract all files
  *     Set up magic.mime
  */
-//\Zip\Mime::setMagicMime(__DIR__ . DIRECTORY_SEPARATOR . 'magic.mime');
+\Zip\Mime::setMagicMime(__DIR__ . DIRECTORY_SEPARATOR . 'magic.mime');
 
 $zip = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
 $files = $zip->open()

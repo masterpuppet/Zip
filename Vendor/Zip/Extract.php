@@ -518,8 +518,9 @@ class Extract extends Zip
      */
     public function __destruct()
     {
-        if ($this->removeTmpDir === true) {
-            $this->removeFiles($this->getTmpDestinationDir());
+        $tmpDestinationDir = $this->getTmpDestinationDir();
+        if ($this->removeTmpDir === true && empty($tmpDestinationDir) === false) {
+            $this->removeFiles($tmpDestinationDir);
         }
 
         if ($this->removeZipFile === true) {

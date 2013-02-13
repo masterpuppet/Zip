@@ -241,7 +241,8 @@ class Zip
 
         foreach (array_reverse($this->iterateDir($path, true)) as $k => $v) {
             chmod($v, $this->getMode());
-            if (is_dir($v) === true) {
+            $info = new SplFileInfo($v);
+            if ($info->isDir() === true) {
                 rmdir($v);
             } else {
                 unlink($v);

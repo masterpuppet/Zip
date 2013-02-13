@@ -32,19 +32,20 @@ class Create extends Zip
      */
     public function addFullDir($dir)
     {
-        $dir = realpath($dir);
+        $dir  = realpath($dir);
         if (empty($dir) === true) {
             throw new \RuntimeException('Directory do not exists');
         }
 
-        if (is_dir($dir) === false) {
+        $info = new SplFileInfo($dir);
+        if ($info->isDir() === false) {
             throw new \RuntimeException('$dir must be a directory');
         }
-        $dirName = pathinfo($dir, PATHINFO_FILENAME);
 
-        $files = $this->iterateDir($dir);
+        $dirName = pathinfo($dir, PATHINFO_FILENAME);
+        $files   = $this->iterateDir($dir);
         foreach ($files as $k => $v) {
-            $file = $dirName . str_replace($dir, '', $v->getRealPath());
+            $file = ($dirName . str_replace($dir, '', $v->getRealPath()));
             if ($v->isFile() === true) { 
                 $this->zip->addFile($v->getRealPath(), $file);
             } elseif ($v->isDir() === true) {

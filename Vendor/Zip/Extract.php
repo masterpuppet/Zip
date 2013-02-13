@@ -363,6 +363,7 @@ class Extract extends Zip
 
         foreach ($moveFiles as $file) {
             $tmpFile = realpath($tmpDestinationDir . DIRECTORY_SEPARATOR . $file);
+            $info    = new SplFileInfo($tmpFile);
 
             if (empty($tmpFile) === false) {
                 $validMime = Mime::isValidMime($tmpFile);
@@ -387,7 +388,7 @@ class Extract extends Zip
                      * If is a file use copy elseif is a dir use mkdir
                      */
                     if (
-                        is_file($tmpFile) === true
+                        $info->isFile() === true
                         && (
                             file_exists($destination) === false
                             || (file_exists($destination) === true && $this->overwrite === true)
@@ -396,7 +397,7 @@ class Extract extends Zip
                     ) {
                         $filesMoved[] = realpath($destination);
                     } elseif (
-                        is_dir($tmpFile) === true
+                        $info->isDir() === true
                         && file_exists($destination) === false
                         && mkdir($destination, $this->getMode(), true) === true
                     ){
@@ -476,6 +477,11 @@ class Extract extends Zip
         }
 
         return $this->extractFiles($files);
+    }
+
+    public function extractSpecificDirStructure()
+    {
+        
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Zip;
 
 use ZipArchive;
+use SplFileInfo;
 
 class Create extends Zip
 {

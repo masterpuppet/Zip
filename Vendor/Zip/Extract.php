@@ -3,6 +3,7 @@
 namespace Zip;
 
 use ZipArchive;
+use SplFileInfo;
 
 class Extract extends Zip
 {
@@ -363,14 +364,14 @@ class Extract extends Zip
 
         foreach ($moveFiles as $file) {
             $tmpFile = realpath($tmpDestinationDir . DIRECTORY_SEPARATOR . $file);
-            $info    = new SplFileInfo($tmpFile);
+            $tmpInfo = new SplFileInfo($tmpFile);
 
             if (empty($tmpFile) === false) {
                 $validMime = Mime::isValidMime($tmpFile);
 
                 if ($validMime === true) {
-                    $basename    = basename($file);
                     $destination = $destinationDir . DIRECTORY_SEPARATOR;
+                    $baseName    = basename($file);
 
                     if ($this->sameStructure === true) {
                         $destination .= dirname($file) . DIRECTORY_SEPARATOR;
@@ -380,24 +381,29 @@ class Extract extends Zip
                         }
                     }
 
-                    $destination .= ($this->sameName === false)
-                                  ? $this->addSuffix($basename)
-                                  : $basename;
+                    $destination    .= ($this->sameName === false)
+                                     ? $this->addSuffix($baseName)
+                                     : $baseName;
+                    $destinationInfo = new SplFileInfo($destination);
 
                     /**
                      * If is a file use copy elseif is a dir use mkdir
                      */
                     if (
-                        $info->isFile() === true
+                        $tmpInfo->isFile() === true
                         && (
                             file_exists($destination) === false
-                            || (file_exists($destination) === true && $this->overwrite === true)
+                            || (
+                                file_exists($destination) === true
+                                && $this->overwrite === true
+                                && $destinationInfo->isWritable() === true
+                            )
                         )
                         && copy($tmpFile, $destination) === true
                     ) {
                         $filesMoved[] = realpath($destination);
                     } elseif (
-                        $info->isDir() === true
+                        $tmpInfo->isDir() === true
                         && file_exists($destination) === false
                         && mkdir($destination, $this->getMode(), true) === true
                     ){
@@ -462,15 +468,14 @@ class Extract extends Zip
         $files = array();
         for ($i = 0; $i < $this->zip->numFiles; $i++) {
             $fileInfo = $this->zip->statIndex($i);
-            $e        = explode('/', rtrim($fileInfo['name'], '/'));
-            $file     = end($e);
+            $baseName = basename($fileInfo['name']);
 
             /**
              * Check first if user write full path or check if user only write the name of the file and want to check everything
              */
             if (
                 in_array($fileInfo['name'], $this->getFilesToExtract()) === true
-                || $this->greedy === true && (in_array($file, $this->getFilesToExtract()) === true)
+                || $this->greedy === true && (in_array($baseName, $this->getFilesToExtract()) === true)
             ){
                 $files[] = $fileInfo['name'];
             }

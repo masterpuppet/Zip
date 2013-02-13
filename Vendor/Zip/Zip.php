@@ -5,6 +5,7 @@ namespace Zip;
 use ZipArchive;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 
 class Zip
 {

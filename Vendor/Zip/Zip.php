@@ -261,11 +261,10 @@ class Zip
     {
         if (method_exists($this->zip, $method) === true) {
             call_user_func_array(array($this->zip, $method), $arguments);
-        } else {
-            throw new \BadMethodCallException('Method "' .  __CLASS__ . '::' . $method . '" do not exists');
+            return $this;
         }
 
-        return $this;
+        throw new \BadMethodCallException('Method "' .  __CLASS__ . '::' . $method . '" do not exists');
     }
 
     /**

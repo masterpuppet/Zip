@@ -9,12 +9,17 @@ class Create extends Zip
     /**
      * @param null|string $fileName
      * @return \Zip
+     * @throws \RuntimeException
      */
     public function create($fileName = null)
     {
         $fileName = (empty($fileName) === true)
                   ? $this->getZipFileName()
                   : $fileName;
+        if (empty($fileName) === true) {
+            throw new \RuntimeException('$fileName cannot be empty');
+        }
+
         $fileName = pathinfo($fileName, PATHINFO_FILENAME) . '.zip';
         $open = $this->open($fileName, ZIPARCHIVE::CREATE);
 

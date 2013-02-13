@@ -226,15 +226,18 @@ class Zip
         if (empty($path) === true) {
             return false;
         }
+        chmod($path, $this->getMode());
+
 
         foreach (array_reverse($this->iterateDir($path, true)) as $k => $v) {
+            chmod($v, $this->getMode());
             if (is_dir($v) === true) {
-                @rmdir($v);
+                rmdir($v);
             } else {
-                @unlink($v);
+                unlink($v);
             }
         }
 
-        return @rmdir($path);
+        return rmdir($path);
     }
 }

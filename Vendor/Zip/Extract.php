@@ -76,6 +76,11 @@ class Extract extends Zip
      */
     protected $removeTmpDir   = true;
 
+    /**
+     * @var boolean
+     */
+    protected $overwrite      = false;
+
    /**
      * @param string $basePath               Base path of zip
      * @param string $fileName               Name of file
@@ -307,6 +312,19 @@ class Extract extends Zip
     }
 
     /**
+     * Overwrite existing file or dir
+     *
+     * @param boolean $bool
+     * @return \Zip
+     */
+    public function overwrite($bool)
+    {
+        $this->overwrite = $bool;
+
+        return $this;
+    }
+
+    /**
      * Get list from a specific directory
      *
      * @return array
@@ -326,30 +344,30 @@ class Extract extends Zip
      * Move allowed file to new destination
      *
      * @param array $moveFiles
-     * @return array
+     * @return array with files moved
      * @throws \InvalidArgumentException
      */
     public function moveValidFiles(array $moveFiles = array())
     {
         $filesMoved        = array();
-        $destinationDir    = $this->getDestinationDir();
         $tmpDestinationDir = $this->getTmpDestinationDir();
-
-        if (empty($destinationDir) === true) {
-            throw new \InvalidArgumentException('There is no a destination declared in $destinationDir');
-        }
+        $destinationDir    = $this->getDestinationDir();
 
         if (empty($tmpDestinationDir) === true) {
             throw new \InvalidArgumentException('There is no a temporary destination declared in $tmpDestinationDir');
+        }
+
+        if (empty($destinationDir) === true) {
+            throw new \InvalidArgumentException('There is no a destination declared in $destinationDir');
         }
 
         foreach ($moveFiles as $file) {
             $tmpFile = realpath($tmpDestinationDir . DIRECTORY_SEPARATOR . $file);
 
             if (empty($tmpFile) === false) {
-                $mime = Mime::isValidMime($tmpFile);
+                $validMime = Mime::isValidMime($tmpFile);
 
-                if ($mime['isValid'] === true) {
+                if ($validMime === true) {
                     $basename    = basename($file);
                     $destination = $destinationDir . DIRECTORY_SEPARATOR;
 
@@ -361,13 +379,27 @@ class Extract extends Zip
                         }
                     }
 
-                    if ($this->sameName === false) {
-                        $destination .= $this->addSuffix($basename);
-                    } else {
-                        $destination .= $basename;
-                    }
+                    $destination .= ($this->sameName === false)
+                                  ? $this->addSuffix($basename)
+                                  : $basename;
 
-                    if (copy($tmpFile, $destination) === true) {
+                    /**
+                     * If is a file use copy elseif is a dir use mkdir
+                     */
+                    if (
+                        is_file($tmpFile) === true
+                        && (
+                            file_exists($destination) === false
+                            || (file_exists($destination) === true && $this->overwrite === true)
+                        )
+                        && copy($tmpFile, $destination) === true
+                    ) {
+                        $filesMoved[] = realpath($destination);
+                    } elseif (
+                        is_dir($tmpFile) === true
+                        && file_exists($destination) === false
+                        && mkdir($destination, $this->getMode(), true) === true
+                    ){
                         $filesMoved[] = realpath($destination);
                     }
                 }
@@ -397,7 +429,6 @@ class Extract extends Zip
      * Extract allowed files to temporary directory
      *
      * @return array
-     * @throws \InvalidArgumentException
      */
     public function extractByExtension()
     {
@@ -424,27 +455,23 @@ class Extract extends Zip
      * Extract specifics files
      *
      * @return array
-     * @throws \InvalidArgumentException
      */
     public function extractSpecificsFiles()
     {
-        $files          = array();
+        $files = array();
         for ($i = 0; $i < $this->zip->numFiles; $i++) {
-            $file     = $this->zip->statIndex($i);
-            $pathInfo = pathinfo($file['name']);
+            $fileInfo = $this->zip->statIndex($i);
+            $e        = explode('/', rtrim($fileInfo['name'], '/'));
+            $file     = end($e);
 
-            if (empty($pathInfo['extension']) === false) {
-                $fileName = $pathInfo['filename'] . '.' . $pathInfo['extension'];
-
-                /**
-                 * Check first if user write full path or check if user only write the name of the file and want to check everything
-                 */
-                if (
-                    in_array($file, $this->getFilesToExtract()) === true
-                    || (in_array($fileName, $this->getFilesToExtract()) === true && $this->greedy === true)
-                ){
-                    $files[] = $file['name'];
-                }
+            /**
+             * Check first if user write full path or check if user only write the name of the file and want to check everything
+             */
+            if (
+                in_array($fileInfo['name'], $this->getFilesToExtract()) === true
+                || $this->greedy === true && (in_array($file, $this->getFilesToExtract()) === true)
+            ){
+                $files[] = $fileInfo['name'];
             }
         }
 

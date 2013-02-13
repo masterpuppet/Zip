@@ -14,61 +14,50 @@ class Mime
     /**
      * array with default accepted mime files
      *
+     * Example:
+     *     Specify a single mime extension
+     *     \Zip\Mime::setMimeFile('jpg', 'image/jpeg');
+     *     \Zip\Mime::setMimeFile('gif', 'image/gif');
+     *     
+     *     Specify multiple mimes to an extension
+     *     \Zip\Mime::setMimeFile('txt', array('text/plain', 'application/x-empty'));
+     *
+     *     Setup multiple mimes
+     *     $mimes = array(
+     *         'jpg' => 'image/jpeg',
+     *         'txt' => array(
+     *             'text/plain',
+     *             'application/x-empty',
+     *         ),
+     *     );
+     *     \Zip\Mime::setMimeFiles($mimes);
+     *
      * @var array
      */
-    protected static $mimeFiles = array(
-        'jpg'  => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'gif'  => 'image/gif',
-        'png'  => 'image/png',
-        'bmp'  => 'image/bmp',
-        'tiff' => 'image/tiff',
-        'tif' => 'image/tiff',
-        'txt' => array(
-            'text/plain',
-            'application/x-empty',
-        ),
-        'doc' => array(
-            'application/msword',
-        ),
-        'docx' => array(
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/zip',
-        ),
-        'xls' => array(
-            'application/vnd.ms-excel',
-        ),
-        'xlsx' => array(
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/zip',
-        ),
-        'ppt' => array(
-            'application/vnd.ms-powerpoint',
-            'application/vnd.ms-office',
-        ),
-        'pptx' => array(
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'application/zip',
-        ),
-        'pdf' => 'application/pdf',
-    );
+    protected static $mimeFiles = array();
+
+    /**
+     * @var boolean
+     */
+    protected static $validateMime = false;
 
     /**
      * @param string $fileName
+     * @return boolean
      */
     public static function isValidMime($fileName)
     {
+        if (self::$validateMime === false) {
+            return true;
+        }
+
         $isValid   = false;
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
         $mimeFiles = self::getMimeFiles();
         $finfo     = new \finfo(FILEINFO_MIME, self::getMagicMime());
         $e         = explode(';', $finfo->file($fileName));
         if (empty($e[0]) === true) {
-            return array(
-                'isDir'   => false,
-                'isFile'  => false,
-                'isValid' => false,
-            );
+            return false;
         }
 
         if (array_key_exists($extension, $mimeFiles) === true && is_array($mimeFiles[$extension]) === true) {
@@ -77,11 +66,7 @@ class Mime
             $isValid = ($e[0] == $mimeFiles[$extension]);
         }
 
-        return array(
-            'isDir'   => ($e[0] == 'directory'),
-            'isFile'  => ($e[0] != 'directory'),
-            'isValid' => ($isValid === true),
-        );
+        return $isValid;
     }
 
     /**
@@ -119,18 +104,54 @@ class Mime
     }
 
     /**
-     * Set allowed mime
+     * Set allowed mime and setup self::$validateMime to true
      *
      * @param string $extension Extension value
-     *               Example: jpg
-                              txt
      * @param string|array $mime Mime value
-     *               Example: image/jpeg
-     *                        array('text/plan', 'application/x-empty')
+     * @see \Zip\Mime::$mimeFiles For examples
+     * @throws \InvalidArgumentException
      */
-    public static function setMimeFiles($extension, $mime)
+    public static function setMimeFile($extension, $mime)
     {
+        if (empty($extension) === true) {
+            throw new \InvalidArgumentException('$extension cannot be empty');
+        }
+
+        if (empty($mime) === true) {
+            throw new \InvalidArgumentException('$mime cannot be empty');
+        }
+
         self::$mimeFiles[$extension] = $mime;
+
+        self::validateMime(true);
+    }
+
+    /**
+     * Set allowed mime and setup self::$validateMime to true
+     *
+     * @param array $mimes
+     * @see \Zip\Mime::$mimeFiles For examples
+     * @throws \InvalidArgumentException
+     */
+    public static function setMimeFiles(array $mimes)
+    {
+        if (empty($mimes) === true) {
+            throw new \InvalidArgumentException('$mimes cannot be empty');
+        }
+
+        foreach ($mimes as $extension => $mime) {
+            self::$mimeFiles[$extension] = $mime;
+        }
+
+        self::validateMime(true);
+    }
+
+    /**
+     * @param boolean $bool
+     */
+    public static function validateMime($bool)
+    {
+        self::$validateMime = $bool;
     }
 
     /**
@@ -147,7 +168,9 @@ class Mime
 
         if ($flatArray === true) {
             array_walk_recursive(self::$mimeFiles, function ($mime, $extension) use (&$localMimeFiles) {
-                $localMimeFiles[] = $mime;
+                if (in_array($mime, $localMimeFiles) === false) {
+                    $localMimeFiles[] = $mime;
+                }
             });
         } else {
             $localMimeFiles = self::$mimeFiles;

@@ -5,16 +5,17 @@ $loader = new \Loader\Autoloading(__DIR__ . DIRECTORY_SEPARATOR . 'Vendor');
 
 echo '<pre>';
 
+
 /**
  * Example 1
  *     Extract all files
  */
-$zip = new \Zip\Create('./');
-$zip->create('zipfile')
-    ->addFullDir('zip')
-    ->addFromString('test.txt', 'work')
-    ->addEmptyDir('directory');
-echo $zip->getZip()->numFiles;exit;
+$zip   = new \Zip\Extract('./', 'test.zip', 'zip');
+$files = $zip->open()
+             ->extractAllFiles();
+echo 'Files added: ';
+var_dump($files);
+
 
 /**
  * Example 2
@@ -25,26 +26,51 @@ $zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
 $files = $zip->open()
              ->setSuffix(date('Y-m-d'))
              ->extractByExtension();
+echo 'Files added: ';
 var_dump($files);
+
 
 /**
  * Example 3
  *     Extract specifics files
- */
-
-/**
- * If you want to add an extension and mime. This is optional
- */
-\Zip\Mime::setMimeFiles('extension_value', 'mime_value');
-
-/**
+ *
  * Another way is using: $zip->setFilesToExtract(array('file1.ext', 'file2.ext', '...'));
  */
 $zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
 $files = $zip->open()
-             ->sameStructure(true)
+             ->sameStructure(false)
+             ->overwrite(true)
              ->setFileToExtract('file.ext')
+             ->setFileToExtract('dir')
              ->extractSpecificsFiles();
+echo 'Files added: ';
+var_dump($files);
+
+
+/**
+ * Example 4
+ *     Extract specifics files
+ *
+ * \Zip\Mime::setMimeFiles() change value of \Zip\Mime::$validateMime to true
+ *
+ * Another way to add files is using: $zip->setFilesToExtract(array('file1.ext', 'file2.ext', '...'));
+ */
+$mimes = array(
+    'ext'  => 'mime',
+    'ext2' => array(
+        'mime1',
+        'mme2',
+    ),
+);
+\Zip\Mime::setMimeFiles($mimes);
+$zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
+$files = $zip->open()
+             ->sameStructure(false)
+             ->overwrite(true)
+             ->setFileToExtract('file.ext')
+             ->setFileToExtract('dir')
+             ->extractSpecificsFiles();
+echo 'Files added: ';
 var_dump($files);
 
 
@@ -55,9 +81,10 @@ var_dump($files);
  */
 \Zip\Mime::setMagicMime(__DIR__ . DIRECTORY_SEPARATOR . 'magic.mime');
 
-$zip = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
+$zip = new \Zip\Extract('./', 'test.zip', 'zip');
 $files = $zip->open()
              ->extractAllFiles();
+echo 'Files added: ';
 var_dump($files);
 
 

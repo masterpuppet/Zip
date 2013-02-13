@@ -36,6 +36,10 @@ class Create extends Zip
         if (empty($dir) === true) {
             throw new \RuntimeException('Directory do not exists');
         }
+
+        if (is_dir($dir) === false) {
+            throw new \RuntimeException('$dir must be a directory');
+        }
         $dirName = pathinfo($dir, PATHINFO_FILENAME);
 
         $files = $this->iterateDir($dir);

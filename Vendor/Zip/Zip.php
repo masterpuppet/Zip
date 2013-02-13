@@ -32,30 +32,29 @@ class Zip
      * @var array
      */
     protected $zipError = array(
-        ZIPARCHIVE::ER_MULTIDISK   => 'Multi-disk zip archives not supported',
-        ZIPARCHIVE::ER_RENAME      => 'Renaming temporary file failed',
-        ZIPARCHIVE::ER_CLOSE       => 'Closing zip archive failed',
-        ZIPARCHIVE::ER_EXISTS      => 'File already exists',
-        ZIPARCHIVE::ER_TMPOPEN     => 'Failure to create temporary file',
-        ZIPARCHIVE::ER_ZLIB        => 'Zlib error',
         ZIPARCHIVE::ER_CHANGED     => 'Entry has been changed',
+        ZIPARCHIVE::ER_CLOSE       => 'Closing zip archive failed',
         ZIPARCHIVE::ER_COMPNOTSUPP => 'Compression method not supported',
-        ZIPARCHIVE::ER_EOF         => 'Premature EOF',
-        ZIPARCHIVE::ER_INTERNAL    => 'Internal error',
-        ZIPARCHIVE::ER_INCONS      => 'Zip archive inconsistent',
-        ZIPARCHIVE::ER_REMOVE      => 'Can\'t remove file',
+        ZIPARCHIVE::ER_CRC         => 'CRC error',
         ZIPARCHIVE::ER_DELETED     => 'Entry has been deleted',
+        ZIPARCHIVE::ER_EOF         => 'Premature EOF',
+        ZIPARCHIVE::ER_EXISTS      => 'File already exists',
+        ZIPARCHIVE::ER_INCONS      => 'Zip archive inconsistent',
+        ZIPARCHIVE::ER_INTERNAL    => 'Internal error',
         ZIPARCHIVE::ER_INVAL       => 'Invalid argument',
         ZIPARCHIVE::ER_MEMORY      => 'Malloc failure',
+        ZIPARCHIVE::ER_MULTIDISK   => 'Multi-disk zip archives not supported',
         ZIPARCHIVE::ER_NOENT       => 'No such file',
         ZIPARCHIVE::ER_NOZIP       => 'Not a zip archive',
         ZIPARCHIVE::ER_OPEN        => 'Can\'t open file',
-        ZIPARCHIVE::ER_WRITE       => 'Write error',
         ZIPARCHIVE::ER_READ        => 'Read error',
+        ZIPARCHIVE::ER_REMOVE      => 'Can\'t remove file',
+        ZIPARCHIVE::ER_RENAME      => 'Renaming temporary file failed',
         ZIPARCHIVE::ER_SEEK        => 'Seek error',
-        ZIPARCHIVE::ER_CRC         => 'CRC error',
+        ZIPARCHIVE::ER_TMPOPEN     => 'Failure to create temporary file',
+        ZIPARCHIVE::ER_WRITE       => 'Write error',
         ZIPARCHIVE::ER_ZIPCLOSED   => 'Containing zip archive was closed',
-        
+        ZIPARCHIVE::ER_ZLIB        => 'Zlib error',        
    );
 
     /**
@@ -66,12 +65,9 @@ class Zip
     public function __construct($basePath = './', $fileName = null)
     {
         if (empty($basePath) === true) {
-            throw new \InvalidArgumentException('There must be a base path in $basePath');
+            throw new \InvalidArgumentException('You must set a base path');
         }
 
-        /**
-         * Fix base path so it get the correct directory separator and trim the last one if got any
-         */
         $this->setBasePath($basePath);
 
         if (empty($fileName) === false) {
@@ -126,6 +122,9 @@ class Zip
      */
     public function setBasePath($basePath)
     {
+        /**
+         * Fix base path so it get the correct directory separator and trim the last one if got any
+         */
         $basePath = rtrim(preg_replace('~(\\+)|(/+)~', DIRECTORY_SEPARATOR, $basePath), DIRECTORY_SEPARATOR);
 
         if (file_exists($basePath) === false) {
@@ -139,7 +138,6 @@ class Zip
 
     /**
      * @return string Base path directory
-     * @return \Zip
      */
     public function getBasePath()
     {

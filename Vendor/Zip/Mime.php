@@ -6,11 +6,15 @@ class Mime
 {
     /**
      * Path to magic.mime file
+     *
+     * @var null|string
      */
     protected static $magicMime = null;
 
     /**
      * array with default accepted mime files
+     *
+     * @var array
      */
     protected static $mimeFiles = array(
         'jpg'  => 'image/jpeg',

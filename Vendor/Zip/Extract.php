@@ -3,8 +3,6 @@
 namespace Zip;
 
 use ZipArchive;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 
 class Extract extends Zip
 {
@@ -106,6 +104,8 @@ class Extract extends Zip
     public function setFileToExtract($file)
     {
         $this->filesToExtract[] = $file;
+
+        return $this;
     }
 
     /**
@@ -116,6 +116,8 @@ class Extract extends Zip
     public function setFilesToExtract(array $file)
     {
         $this->filesToExtract = $file;
+
+        return $this;
     }
 
     /**
@@ -136,10 +138,12 @@ class Extract extends Zip
     public function setDestinationDir($destinationDir)
     {
         if (file_exists($destinationDir) === false) {
-            mkdir($destinationDir);
+            mkdir($destinationDir, $this->getMode(), true);
         }
 
         $this->destinationDir = realpath($destinationDir);
+
+        return $this;
     }
 
     /**
@@ -160,10 +164,12 @@ class Extract extends Zip
     public function setTmpDestinationDir($tmpDestinationDir)
     {
         if (file_exists($tmpDestinationDir) === false) {
-            mkdir($tmpDestinationDir);
+            mkdir($tmpDestinationDir, $this->getMode(), true);
         }
 
         $this->tmpDestinationDir = realpath($tmpDestinationDir);
+
+        return $this;
     }
 
     /**
@@ -182,6 +188,8 @@ class Extract extends Zip
     public function greedy($bool)
     {
         $this->greedy = $bool;
+
+        return $this;
     }
 
     /**
@@ -190,6 +198,8 @@ class Extract extends Zip
     public function sameStructure($bool)
     {
         $this->sameStructure = $bool;
+
+        return $this;
     }
 
     /**
@@ -198,6 +208,8 @@ class Extract extends Zip
     public function sameName($bool)
     {
         $this->sameName = $bool;
+
+        return $this;
     }
 
     /**
@@ -229,6 +241,8 @@ class Extract extends Zip
         $this->suffix = $separator . $suffix;
 
         $this->sameName(false);
+
+        return $this;
     }
 
     /**
@@ -245,6 +259,8 @@ class Extract extends Zip
     public function setSeparator($separator)
     {
         $this->separator = $separator;
+
+        return $this;
     }
 
     /**
@@ -263,6 +279,8 @@ class Extract extends Zip
     public function removeZipFile($bool)
     {
         $this->removeZipFile = $bool;
+
+        return $this;
     }
 
     /**
@@ -273,22 +291,8 @@ class Extract extends Zip
     public function removeTmpDir($bool)
     {
         $this->removeTmpDir = $bool;
-    }
 
-    /**
-     * Iterate directory
-     *
-     * @param string $path Path to iterate
-     */
-    public function iterateDir($path)
-    {
-        if (empty($path) === true) {
-            return false;
-        }
-
-        $dir = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
-
-        return new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::SELF_FIRST);
+        return $this;
     }
 
     /**
@@ -341,10 +345,9 @@ class Extract extends Zip
                     if ($this->sameStructure === true) {
                         $destination .= dirname($file) . DIRECTORY_SEPARATOR;
 
-                        /**
-                         * mkdir send an error if one of the directories exists
-                         */
-                        @mkdir($destination, '0666', true);
+                        if (file_exists($destination) === false) {
+                            mkdir($destination, $this->getMode(), true);
+                        }
                     }
 
                     if ($this->sameName === false) {
@@ -470,7 +473,7 @@ class Extract extends Zip
             $this->zip->close();
 
             if ($this->removeTmpDir === true) {
-                $this->rrmdir($this->getTmpDestinationDir(), false);
+                $this->removeFiles($this->getTmpDestinationDir());
             }
 
             if ($this->removeZipFile === true) {

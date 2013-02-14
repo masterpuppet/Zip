@@ -15,6 +15,7 @@ $files = $zip->open()
 echo 'Files added: ';
 var_dump($files);
 
+
 /**
  * Example 2
  *     Extract by extension

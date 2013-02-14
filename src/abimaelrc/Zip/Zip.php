@@ -130,7 +130,6 @@ class Zip
 
         if (file_exists($basePath) === false) {
             mkdir($basePath, $this->getMode(), true);
-            chmod($basePath, $this->getMode());
         }
 
         $this->basePath = realpath($basePath);
@@ -238,11 +237,8 @@ class Zip
         if (empty($path) === true) {
             return false;
         }
-        chmod($path, $this->getMode());
-
 
         foreach (array_reverse($this->iterateDir($path, true)) as $k => $v) {
-            chmod($v, $this->getMode());
             $info = new SplFileInfo($v);
             if ($info->isDir() === true) {
                 rmdir($v);

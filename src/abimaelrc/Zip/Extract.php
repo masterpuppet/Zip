@@ -148,6 +148,7 @@ class Extract extends Zip
     {
         if (file_exists($destinationDir) === false) {
             mkdir($destinationDir, $this->getMode(), true);
+            chmod($destinationDir, $this->getMode());
         }
 
         $this->destinationDir = realpath($destinationDir);
@@ -175,6 +176,7 @@ class Extract extends Zip
     {
         if (file_exists($tmpDestinationDir) === false) {
             mkdir($tmpDestinationDir, $this->getMode(), true);
+            chmod($tmpDestinationDir, $this->getMode());
         }
 
         $this->tmpDestinationDir = realpath($tmpDestinationDir);
@@ -378,6 +380,7 @@ class Extract extends Zip
 
                         if (file_exists($destination) === false) {
                             mkdir($destination, $this->getMode(), true);
+                            chmod($destination, $this->getMode());
                         }
                     }
 
@@ -406,6 +409,7 @@ class Extract extends Zip
                             $tmpInfo->isDir() === true
                             && file_exists($destination) === false
                             && mkdir($destination, $this->getMode(), true) === true
+                            && chmod($destination, $this->getMode()) === true
                         ) || (
                             $tmpInfo->isDir() === true
                             && file_exists($destination) === true

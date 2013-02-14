@@ -1,7 +1,6 @@
 <?php
-require_once __DIR__ . '/Vendor/Loader/AutoLoading.php';
-
-$loader = new \Loader\Autoloading(__DIR__ . DIRECTORY_SEPARATOR . 'Vendor');
+require_once __DIR__ . '/src/abimaelrc/Loader/AutoLoading.php';
+$loader = new \Loader\Autoloading(__DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'abimaelrc');
 
 echo '<pre>';
 
@@ -15,7 +14,6 @@ $files = $zip->open()
              ->extractAllFiles();
 echo 'Files added: ';
 var_dump($files);
-
 
 /**
  * Example 2

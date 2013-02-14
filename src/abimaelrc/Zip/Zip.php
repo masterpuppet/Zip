@@ -27,7 +27,7 @@ class Zip
     /**
      * @var string
      */
-    protected $mode = '0666';
+    protected $mode = 0755;
 
     /**
      * @var array
@@ -130,6 +130,7 @@ class Zip
 
         if (file_exists($basePath) === false) {
             mkdir($basePath, $this->getMode(), true);
+            chmod($basePath, $this->getMode());
         }
 
         $this->basePath = realpath($basePath);

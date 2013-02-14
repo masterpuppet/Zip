@@ -475,7 +475,9 @@ class Extract extends Zip
             $fileInfo = $this->zip->statIndex($i);
 
             /**
-             * Check first if user write full path or check if user only write the name of the file and want to check everything
+             * Check first if user write full path
+             * or check if user only write the name of the file
+             * and want to check everything
              */
             if (
                 in_array($fileInfo['name'], $this->getFilesToExtract()) === true

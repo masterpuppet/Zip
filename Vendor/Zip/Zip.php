@@ -260,6 +260,7 @@ class Zip
     {
         if (method_exists($this->zip, $method) === true) {
             call_user_func_array(array($this->zip, $method), $arguments);
+
             return $this;
         }
 

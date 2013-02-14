@@ -3,7 +3,6 @@
 namespace Zip;
 
 use SplFileInfo;
-use RecursiveArrayIterator;
 
 class Mime
 {

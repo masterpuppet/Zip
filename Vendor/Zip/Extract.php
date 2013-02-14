@@ -481,7 +481,7 @@ class Extract extends Zip
              */
             if (
                 in_array($fileInfo['name'], $this->getFilesToExtract()) === true
-                || $this->greedy === true && (in_array(basename($fileInfo['name']), $this->getFilesToExtract()) === true)
+                || ($this->greedy === true && in_array(basename($fileInfo['name']), $this->getFilesToExtract()) === true)
             ){
                 $files[] = $fileInfo['name'];
             }

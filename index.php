@@ -10,6 +10,20 @@ echo '<pre>';
  * Example 1
  *     Extract all files
  */
+$zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
+$files = $zip->open()
+             ->sameStructure(false)
+             ->overwrite(true)
+             ->setFileToExtract('test')
+             ->extractSpecificDirStructure();
+echo 'Files added: ';
+var_dump($files);
+exit;
+
+/**
+ * Example 1
+ *     Extract all files
+ */
 $zip   = new \Zip\Extract('./', 'test.zip', 'zip');
 $files = $zip->open()
              ->extractAllFiles();

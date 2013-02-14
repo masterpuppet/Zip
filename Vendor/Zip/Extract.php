@@ -398,14 +398,19 @@ class Extract extends Zip
                                 && $this->overwrite === true
                                 && $destinationInfo->isWritable() === true
                             )
-                        )
-                        && copy($tmpFile, $destination) === true
+                        ) && copy($tmpFile, $destination) === true
                     ) {
                         $filesMoved[] = realpath($destination);
                     } elseif (
-                        $tmpInfo->isDir() === true
-                        && file_exists($destination) === false
-                        && mkdir($destination, $this->getMode(), true) === true
+                        (
+                            $tmpInfo->isDir() === true
+                            && file_exists($destination) === false
+                            && mkdir($destination, $this->getMode(), true) === true
+                        ) || (
+                            $tmpInfo->isDir() === true
+                            && file_exists($destination) === true
+                            $this->overwrite === true
+                        )
                     ){
                         $filesMoved[] = realpath($destination);
                     }
@@ -468,14 +473,13 @@ class Extract extends Zip
         $files = array();
         for ($i = 0; $i < $this->zip->numFiles; $i++) {
             $fileInfo = $this->zip->statIndex($i);
-            $baseName = basename($fileInfo['name']);
 
             /**
              * Check first if user write full path or check if user only write the name of the file and want to check everything
              */
             if (
                 in_array($fileInfo['name'], $this->getFilesToExtract()) === true
-                || $this->greedy === true && (in_array($baseName, $this->getFilesToExtract()) === true)
+                || $this->greedy === true && (in_array(basename($fileInfo['name']), $this->getFilesToExtract()) === true)
             ){
                 $files[] = $fileInfo['name'];
             }
@@ -484,9 +488,27 @@ class Extract extends Zip
         return $this->extractFiles($files);
     }
 
+    /**
+     * @return array
+     */
     public function extractSpecificDirStructure()
     {
-        
+        $files = array();
+        foreach ($this->getFilesToExtract() as $k => $v) {
+            $v = ltrim(preg_replace('~(\\+)|(/+)~', '/', ($v . '/')), '/');
+            $i = $this->zip->locateName($v);
+            for ($i; $i < $this->zip->numFiles; $i++) {
+                $file = $this->zip->getNameIndex($i);
+                if (preg_match('~^' . preg_quote($v, '~') . '~', $file) === 1) {
+                    $files[] = $file;
+                } else {
+                    break;
+                }
+            }
+        }
+        var_dump($files);
+
+        return $this->extractFiles($files);
     }
 
     /**

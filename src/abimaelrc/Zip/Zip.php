@@ -25,7 +25,7 @@ class Zip
     protected $zip;
 
     /**
-     * @var string
+     * @var octal
      */
     protected $mode = 0755;
 

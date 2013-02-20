@@ -1,6 +1,6 @@
 <?php
 
-namespace Zip;
+namespace Abimaelrc\Zip;
 
 use ZipArchive;
 use RecursiveDirectoryIterator;

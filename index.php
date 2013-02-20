@@ -1,27 +1,28 @@
 <?php
-require_once __DIR__ . '/src/abimaelrc/Loader/AutoLoading.php';
-$loader = new \Loader\Autoloading(__DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'abimaelrc');
+namespace Index;
+
+require_once __DIR__ . '/src/Abimaelrc/Loader/AutoLoading.php';
+$loader = new \Loader\Autoloading(__DIR__ . DIRECTORY_SEPARATOR . 'src');
+
+use Abimaelrc\Zip as Zip;
 
 echo '<pre>';
-
-
 /**
  * Example 1
  *     Extract all files
  */
-$zip   = new \Zip\Extract('./', 'test.zip', 'zip');
+$zip   = new Zip\Extract('./', 'test.zip', 'zip');
 $files = $zip->open()
              ->extractAllFiles();
 echo 'Files added: ';
 var_dump($files);
-
 
 /**
  * Example 2
  *     Extract by extension
  *     Add suffix to filename
  */
-$zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
+$zip   = new Zip\Extract('./', 'test.zip', 'zip', 'tmp');
 $files = $zip->open()
              ->setSuffix(date('Y-m-d'))
              ->extractByExtension();

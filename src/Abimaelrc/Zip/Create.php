@@ -9,7 +9,7 @@ class Create extends Zip
 {
     /**
      * @param null|string $fileName
-     * @return \Zip
+     * @return \Abimaelrc\Zip
      * @throws \RuntimeException
      */
     public function create($fileName = null)
@@ -29,7 +29,7 @@ class Create extends Zip
 
     /**
      * @param string $dir
-     * @return \Zip
+     * @return \Abimaelrc\Zip
      */
     public function addFullDir($dir)
     {

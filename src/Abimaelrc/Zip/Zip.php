@@ -79,7 +79,7 @@ class Zip
     /**
      * @param null|string $fileName
      * @param integer     $flags
-     * @return \Zip
+     * @return \Abimaelrc\Zip
      * @throws \RuntimeException
      */
     public function open($fileName = null, $flags = 0)
@@ -119,7 +119,7 @@ class Zip
 
     /**
      * @param string $basePath Base path directory
-     * @return \Zip
+     * @return \Abimaelrc\Zip
      */
     public function setBasePath($basePath)
     {
@@ -147,7 +147,7 @@ class Zip
 
     /**
      * @param string $fileName Zip file name
-     * @return \Zip
+     * @return \Abimaelrc\Zip
      */
     public function setZipFileName($fileName)
     {
@@ -174,7 +174,7 @@ class Zip
 
     /**
      * @param string $mode
-     * @return \Zip
+     * @return \Abimaelrc\Zip
      */
     public function setMode($mode)
     {

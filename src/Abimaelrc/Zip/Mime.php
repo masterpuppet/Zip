@@ -18,11 +18,11 @@ class Mime
      *
      * Example:
      *     Specify a single mime extension
-     *     \Zip\Mime::setMimeFile('jpg', 'image/jpeg');
-     *     \Zip\Mime::setMimeFile('gif', 'image/gif');
+     *     \Abimaelrc\Zip\Mime::setMimeFile('jpg', 'image/jpeg');
+     *     \Abimaelrc\Zip\Mime::setMimeFile('gif', 'image/gif');
      *     
      *     Specify multiple mimes to an extension
-     *     \Zip\Mime::setMimeFile('txt', array('text/plain', 'application/x-empty'));
+     *     \Abimaelrc\Zip\Mime::setMimeFile('txt', array('text/plain', 'application/x-empty'));
      *
      *     Setup multiple mimes
      *     $mimes = array(
@@ -32,7 +32,7 @@ class Mime
      *             'application/x-empty',
      *         ),
      *     );
-     *     \Zip\Mime::setMimeFiles($mimes);
+     *     \Abimaelrc\Zip\Mime::setMimeFiles($mimes);
      *
      * @var array
      */
@@ -76,7 +76,7 @@ class Mime
      *
      * @param string $extension Extension value
      * @param string|array $mime Mime value
-     * @see \Zip\Mime::$mimeFiles For examples
+     * @see \Abimaelrc\Zip\Mime::$mimeFiles For examples
      * @throws \InvalidArgumentException
      */
     public static function setMimeFile($extension, $mime)
@@ -98,7 +98,7 @@ class Mime
      * Set allowed mime and setup self::$validateMime to true
      *
      * @param array $mimes
-     * @see \Zip\Mime::$mimeFiles For examples
+     * @see \Abimaelrc\Zip\Mime::$mimeFiles For examples
      * @throws \InvalidArgumentException
      */
     public static function setMimeFiles(array $mimes)

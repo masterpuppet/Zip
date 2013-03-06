@@ -508,7 +508,6 @@ class Extract extends Zip
                 }
             }
         }
-        var_dump($files);
 
         return $this->extractFiles($files);
     }

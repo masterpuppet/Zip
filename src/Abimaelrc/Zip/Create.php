@@ -22,7 +22,7 @@ class Create extends Zip
         }
 
         $fileName = pathinfo($fileName, PATHINFO_FILENAME) . '.zip';
-        $open = $this->open($fileName, ZIPARCHIVE::CREATE);
+        $open     = $this->open($fileName, ZIPARCHIVE::CREATE);
 
         return $this;
     }

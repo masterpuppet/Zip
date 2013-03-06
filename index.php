@@ -36,7 +36,7 @@ var_dump($files);
  *
  * Another way is using: $zip->setFilesToExtract(array('file1.ext', 'file2.ext', '...'));
  */
-$zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
+$zip   = new Zip\Extract('./', 'test.zip', 'zip', 'tmp');
 $files = $zip->open()
              ->sameStructure(false)
              ->overwrite(true)
@@ -51,7 +51,7 @@ var_dump($files);
  * Example 4
  *     Extract specifics files
  *
- * \Zip\Mime::setMimeFiles() change value of \Zip\Mime::$validateMime to true
+ * Zip\Mime::setMimeFiles() change value of Zip\Mime::$validateMime to true
  *
  * Another way to add files is using: $zip->setFilesToExtract(array('file1.ext', 'file2.ext', '...'));
  */
@@ -62,8 +62,8 @@ $mimes = array(
         'mme2',
     ),
 );
-\Zip\Mime::setMimeFiles($mimes);
-$zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
+Zip\Mime::setMimeFiles($mimes);
+$zip   = new Zip\Extract('./', 'test.zip', 'zip', 'tmp');
 $files = $zip->open()
              ->sameStructure(false)
              ->overwrite(true)
@@ -79,9 +79,9 @@ var_dump($files);
  *     Extract all files
  *     Set up magic.mime
  */
-\Zip\Mime::setMagicMime(__DIR__ . DIRECTORY_SEPARATOR . 'magic.mime');
+Zip\Mime::setMagicMime(__DIR__ . DIRECTORY_SEPARATOR . 'magic.mime');
 
-$zip = new \Zip\Extract('./', 'test.zip', 'zip');
+$zip = new Zip\Extract('./', 'test.zip', 'zip');
 $files = $zip->open()
              ->extractAllFiles();
 echo 'Files added: ';
@@ -92,7 +92,7 @@ var_dump($files);
  * Example 5
  *     Extract all files
  */
-$zip   = new \Zip\Extract('./', 'test.zip', 'zip', 'tmp');
+$zip   = new Zip\Extract('./', 'test.zip', 'zip', 'tmp');
 $files = $zip->open()
              ->sameStructure(false)
              ->overwrite(true)
@@ -106,7 +106,7 @@ var_dump($files);
  * Example 6
  *     create zip file
  */
-$zip = new \Zip\Create('./');
+$zip = new Zip\Create('./');
 $zip->create('zipfile')
     ->addFullDir('zip')
     ->addFromString('test.txt', 'work')

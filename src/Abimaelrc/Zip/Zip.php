@@ -251,6 +251,7 @@ class Zip
     }
 
     /**
+     * @return \Abimaelrc\Zip
      * @throws \BadMethodCallException
      */
     public function __call($method, $arguments)
